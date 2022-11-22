@@ -1,0 +1,90 @@
+[package]
+name = "rust_webgl2"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+glam = {version = "0.21.2", features = ["bytemuck"]}
+wee_alloc = "0.4.5"
+cfg-if = "1.0.0"
+wasm-bindgen = "0.2.82"
+wasm-bindgen-futures = "0.4.32"
+js-sys = "0.3.59"
+console_error_panic_hook = "0.1.7"
+bytemuck = "1.11.0"
+
+color = {path = './src/color'}
+webgl2_shader_generation = {path = "./src/webgl2_shader_generation"}
+webgl2_shader_definition = {path = "./src/webgl2_shader_definition"}
+[dependencies.uuid]
+version = "1.1.2"
+features = [
+    "v4",                # Lets you generate random UUIDs
+    "js",
+    "fast-rng",          # Use a faster (but still sufficiently random) RNG
+    "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
+]
+
+[dependencies.web-sys]
+version = "0.3.59"
+features = [
+  #------------------------||
+  'HtmlCanvasElement',
+  #WebGL ------------------||
+  'WebGl2RenderingContext',
+  'WebGlActiveInfo',
+  'WebGlBuffer',
+  'WebGlContextAttributes',
+  'WebGlContextEvent',
+  'WebGlContextEventInit',
+  'WebGlFramebuffer',
+  'WebGlPowerPreference',
+  'WebGlProgram',
+  'WebGlQuery',
+  'WebGlRenderbuffer',
+  'WebGlRenderingContext',
+  'WebGlSampler',
+  'WebGlShader',
+  'WebGlShaderPrecisionFormat',
+  'WebGlSync',
+  'WebGlTexture',
+  'WebGlTransformFeedback',
+  'WebGlUniformLocation',
+  'WebGlVertexArrayObject',
+  'WebglColorBufferFloat',
+  'WebglDebugRendererInfo',
+  'WebglDebugShaders',
+  'WebglDepthTexture',
+  'WebglDrawBuffers',
+  'WebglLoseContext',
+  'WebglMultiDraw',
+  #------------------------||
+  'console',
+  'CssStyleDeclaration',
+  'Document',
+  'DomStringMap',
+  'DomTokenList',
+  'Element',
+  'Event',
+  'EventTarget',
+  'HtmlBodyElement',
+  'HtmlElement',
+  'HtmlInputElement',
+  'KeyboardEvent',
+  'Location',
+  'Node',
+  'NodeList',
+  'Storage',
+  #------------------------||
+  'Window',
+  'Performance', 
+  'PerformanceTiming',
+  'Navigator',
+  'Request',
+  'RequestInit',
+  'RequestMode',
+  'Response',
+  #------------------------||
+]

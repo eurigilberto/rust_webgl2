@@ -22,8 +22,8 @@ use webgl2_shader_definition as shader_def;
 pub use webgl_objects::*;
 mod material;
 pub mod shader_functions;
-pub use shader_functions::*;
 pub use material::*;
+pub use shader_functions::*;
 pub use webgl2_shader_definition;
 pub use webgl2_shader_generation;
 
@@ -42,13 +42,16 @@ pub fn get_canvas() -> Result<HtmlCanvasElement, ()> {
         },
         None => Err(()),
     }
-} 
+}
 
 pub fn create_webgl_context(
 ) -> Result<(HtmlCanvasElement, web_sys::WebGl2RenderingContext), JsValue> {
     let canvas = get_canvas().expect("Could not get the HTMLCanvasElement");
 
-    match js_sys::JSON::parse(&format!("{{\"xrCompatible\":{}, \"antialias\": true}}", "true")) {
+    match js_sys::JSON::parse(&format!(
+        "{{\"xrCompatible\":{}, \"antialias\": true}}",
+        "true"
+    )) {
         Ok(attributes) => {
             match canvas
                 .get_context_with_context_options("webgl2", &attributes)?
@@ -77,9 +80,15 @@ impl Graphics {
         render_context: wgl_context,
         canvas: web_sys::HtmlCanvasElement,
         size: Option<UVec2>,
-        start_background_color: RGBA
+        start_background_color: RGBA,
     ) -> Result<Self, ()> {
-        Self::_clear_framebuffer(&render_context, None, Some(&start_background_color), None, None);
+        Self::_clear_framebuffer(
+            &render_context,
+            None,
+            Some(&start_background_color),
+            None,
+            None,
+        );
 
         let mut _size = uvec2(0, 0);
         if let Some(size) = size {
@@ -504,6 +513,20 @@ pub struct DrawCapabilities {
     pub depth_draw_mask: bool,
 }
 
+impl Default for DrawCapabilities {
+    fn default() -> Self {
+        Self {
+            blend_state: Default::default(),
+            cull_face: Default::default(),
+            depth_test: Default::default(),
+            stencil_test: Default::default(),
+            scissor_test: Default::default(),
+            color_draw_mask: (true, true, true, true),
+            depth_draw_mask: true,
+        }
+    }
+}
+
 impl DrawCapabilities {
     pub fn new(
         blend_state: Option<BlendState>,
@@ -526,31 +549,22 @@ impl DrawCapabilities {
     }
 
     pub fn default_opaque_no_cull() -> Self {
-        DrawCapabilities::new(
-            None,
-            None,
-            Some(DepthFunction::LEQUAL),
-            None,
-            None,
-            None,
-            None,
-        )
+        DrawCapabilities {
+            depth_test: Some(DepthFunction::LEQUAL),
+            ..Default::default()
+        }
     }
 
     pub fn default_opaque() -> Self {
-        DrawCapabilities::new(
-            None,
-            Some(CullMode::BACK),
-            Some(DepthFunction::LEQUAL),
-            None,
-            None,
-            None,
-            None,
-        )
+        DrawCapabilities {
+            cull_face: Some(CullMode::BACK),
+            depth_test: Some(DepthFunction::LEQUAL),
+            ..Default::default()
+        }
     }
 
     pub fn always_render() -> Self {
-        DrawCapabilities::new(None, None, None, None, None, None, None)
+        DrawCapabilities::default()
     }
 
     pub fn get_mut_stencil_state(&mut self) -> Option<&mut StencilTestState> {
@@ -622,8 +636,6 @@ impl DrawCapabilities {
             self.color_draw_mask.3,
         );
 
-        graphics.depth_mask(
-            self.depth_draw_mask,
-        );
+        graphics.depth_mask(self.depth_draw_mask);
     }
 }

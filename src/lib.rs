@@ -452,8 +452,8 @@ pub struct StencilRef {
 pub enum StencilTestState {
     Same(StencilData),
     Separate {
-        pub front: StencilData,
-        pub back: StencilData,
+        front: StencilData,
+        back: StencilData,
     },
 }
 
@@ -461,23 +461,23 @@ pub enum StencilTestState {
 pub enum BlendEquationState {
     Same(BlendEquation),
     Separate {
-        pub rgb: BlendEquation,
-        pub alpha: BlendEquation,
+        rgb: BlendEquation,
+        alpha: BlendEquation,
     },
 }
 
 #[derive(Clone, Copy)]
 pub enum BlendFactorState {
     Same {
-        pub src: BlendFuncFactor,
-        pub dst: BlendFuncFactor,
+        src: BlendFuncFactor,
+        dst: BlendFuncFactor,
     },
     Separate {
-        pub src_rgb: BlendFuncFactor,
-        pub dst_rgb: BlendFuncFactor,
+        src_rgb: BlendFuncFactor,
+        dst_rgb: BlendFuncFactor,
 
-        pub src_alpha: BlendFuncFactor,
-        pub dst_alpha: BlendFuncFactor,
+        src_alpha: BlendFuncFactor,
+        dst_alpha: BlendFuncFactor,
     },
 }
 

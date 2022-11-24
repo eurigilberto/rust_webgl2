@@ -429,11 +429,11 @@ pub fn create_program_from_single_shader_source(
 
 #[derive(Clone, Copy)]
 pub struct StencilData {
-    ref_: StencilRef,
-    func: StencilFunc,
-    fail: StencilOp,
-    zfail: StencilOp,
-    zpass: StencilOp,
+    pub ref_: StencilRef,
+    pub func: StencilFunc,
+    pub fail: StencilOp,
+    pub zfail: StencilOp,
+    pub zpass: StencilOp,
 }
 
 impl StencilData {
@@ -444,16 +444,16 @@ impl StencilData {
 
 #[derive(Clone, Copy)]
 pub struct StencilRef {
-    value: u8,
-    mask: u8,
+    pub value: u8,
+    pub mask: u8,
 }
 
 #[derive(Clone, Copy)]
 pub enum StencilTestState {
     Same(StencilData),
     Separate {
-        front: StencilData,
-        back: StencilData,
+        pub front: StencilData,
+        pub back: StencilData,
     },
 }
 
@@ -461,31 +461,31 @@ pub enum StencilTestState {
 pub enum BlendEquationState {
     Same(BlendEquation),
     Separate {
-        rgb: BlendEquation,
-        alpha: BlendEquation,
+        pub rgb: BlendEquation,
+        pub alpha: BlendEquation,
     },
 }
 
 #[derive(Clone, Copy)]
 pub enum BlendFactorState {
     Same {
-        src: BlendFuncFactor,
-        dst: BlendFuncFactor,
+        pub src: BlendFuncFactor,
+        pub dst: BlendFuncFactor,
     },
     Separate {
-        src_rgb: BlendFuncFactor,
-        dst_rgb: BlendFuncFactor,
+        pub src_rgb: BlendFuncFactor,
+        pub dst_rgb: BlendFuncFactor,
 
-        src_alpha: BlendFuncFactor,
-        dst_alpha: BlendFuncFactor,
+        pub src_alpha: BlendFuncFactor,
+        pub dst_alpha: BlendFuncFactor,
     },
 }
 
 #[derive(Clone, Copy)]
 pub struct BlendState {
-    equation: BlendEquationState,
-    factor: BlendFactorState,
-    blend_color: Option<RGBA>,
+    pub equation: BlendEquationState,
+    pub factor: BlendFactorState,
+    pub blend_color: Option<RGBA>,
 }
 
 #[derive(Clone, Copy)]
@@ -495,13 +495,13 @@ pub struct Scissor {
 }
 
 pub struct DrawCapabilities {
-    blend_state: Option<BlendState>,
-    cull_face: Option<CullMode>,
-    depth_test: Option<DepthFunction>,
-    stencil_test: Option<StencilTestState>,
-    scissor_test: Option<Scissor>,
-    color_draw_mask: (bool, bool, bool, bool),
-    depth_draw_mask: bool,
+    pub blend_state: Option<BlendState>,
+    pub cull_face: Option<CullMode>,
+    pub depth_test: Option<DepthFunction>,
+    pub stencil_test: Option<StencilTestState>,
+    pub scissor_test: Option<Scissor>,
+    pub color_draw_mask: (bool, bool, bool, bool),
+    pub depth_draw_mask: bool,
 }
 
 impl DrawCapabilities {

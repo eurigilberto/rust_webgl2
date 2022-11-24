@@ -14,7 +14,7 @@ use webgl2_shader_definition::ShaderSource;
 pub struct GlMaterial {
     context: Rc<wgl_context>,
     pub program: GlProgram,
-    draw_capabilities: Vec<DrawCapabilities>,
+    pub draw_capabilities: Vec<DrawCapabilities>,
 }
 
 impl GlMaterial {

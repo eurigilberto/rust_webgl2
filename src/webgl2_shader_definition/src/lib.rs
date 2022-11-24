@@ -171,7 +171,7 @@ pub struct ShaderUniform {
     pub name: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ShaderUniformBlock {
     pub binding_number: u32,
     pub name: String,

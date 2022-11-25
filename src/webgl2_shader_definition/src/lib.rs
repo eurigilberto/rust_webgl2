@@ -331,7 +331,7 @@ pub fn generate_fragment_stage_str(
     shader_src: &ShaderSource,
     imported_functions: &Vec<FunctionDefinition>,
 ) -> String {
-    let mut shader_code = String::from("#version 300 es\nprecision highp float;\n");
+    let mut shader_code = String::from("#version 300 es\nprecision highp float;\nprecision highp int;\n");
 
     push_stage_attributes(
         &mut shader_code,
@@ -358,7 +358,7 @@ pub fn generate_vertex_stage_str(
     shader_src: &ShaderSource,
     imported_functions: &Vec<FunctionDefinition>,
 ) -> String {
-    let mut shader_code = String::from("#version 300 es\nprecision highp float;\n");
+    let mut shader_code = String::from("#version 300 es\nprecision highp float;\nprecision highp int;\n");
 
     push_stage_attributes(&mut shader_code, &shader_src.vertex_shader.attributes, true);
     push_varying(&mut shader_code, false, &shader_src.varyings);

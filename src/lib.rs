@@ -574,7 +574,7 @@ impl DrawCapabilities {
         }
     }
 
-    pub fn set_capabilities(&self, graphics: &Graphics) {
+    pub fn set_blend_state(&self, graphics: &Graphics) {
         match self.blend_state {
             Some(state) => {
                 graphics.enable_capability(WebGlCapability::BLEND);
@@ -585,7 +585,9 @@ impl DrawCapabilities {
             }
             None => graphics.disable_capability(WebGlCapability::BLEND),
         }
+    }
 
+    pub fn set_cull_mode(&self, graphics: &Graphics) {
         match self.cull_face {
             Some(mode) => {
                 graphics.enable_capability(WebGlCapability::CULL_FACE);
@@ -593,7 +595,9 @@ impl DrawCapabilities {
             }
             None => graphics.disable_capability(WebGlCapability::CULL_FACE),
         }
+    }
 
+    pub fn set_depth_test(&self, graphics: &Graphics) {
         match self.depth_test {
             Some(depth_fn) => {
                 graphics.enable_capability(WebGlCapability::DEPTH_TEST);
@@ -604,7 +608,9 @@ impl DrawCapabilities {
                 graphics.disable_capability(WebGlCapability::DEPTH_TEST);
             }
         }
+    }
 
+    pub fn set_stencil_test(&self, graphics: &Graphics) {
         match self.stencil_test {
             Some(stencil_state) => {
                 graphics.enable_capability(WebGlCapability::STENCIL_TEST);
@@ -620,7 +626,9 @@ impl DrawCapabilities {
             }
             None => graphics.disable_capability(WebGlCapability::STENCIL_TEST),
         }
+    }
 
+    pub fn set_scissor_test(&self, graphics: &Graphics) {
         match self.scissor_test {
             Some(scissor) => {
                 graphics.enable_capability(WebGlCapability::SCISSOR_TEST);
@@ -628,14 +636,28 @@ impl DrawCapabilities {
             }
             None => graphics.disable_capability(WebGlCapability::SCISSOR_TEST),
         }
+    }
 
+    pub fn set_color_mask(&self, graphics: &Graphics){
         graphics.color_mask(
             self.color_draw_mask.0,
             self.color_draw_mask.1,
             self.color_draw_mask.2,
             self.color_draw_mask.3,
         );
+    }
 
+    pub fn set_depth_mask(&self, graphics: &Graphics){
         graphics.depth_mask(self.depth_draw_mask);
+    }
+
+    pub fn set_capabilities(&self, graphics: &Graphics) {
+        self.set_blend_state(graphics);
+        self.set_cull_mode(graphics);
+        self.set_depth_test(graphics);
+        self.set_stencil_test(graphics);
+        self.set_scissor_test(graphics);
+        self.set_color_mask(graphics);
+        self.set_depth_mask(graphics);
     }
 }

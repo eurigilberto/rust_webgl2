@@ -1,4 +1,3 @@
-use crate::Graphics;
 use web_sys::WebGl2RenderingContext as gl;
 
 #[derive(Clone, Copy)]

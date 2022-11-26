@@ -51,13 +51,16 @@ pub fn get_canvas() -> Result<HtmlCanvasElement, ()> {
     }
 }
 
-pub fn create_webgl_context(
+pub fn create_webgl2_context(
+    xr_compatible: bool,
+    antialias: bool,
+    depth: bool, 
+    stencil: bool
 ) -> Result<(HtmlCanvasElement, web_sys::WebGl2RenderingContext), JsValue> {
     let canvas = get_canvas().expect("Could not get the HTMLCanvasElement");
 
     match js_sys::JSON::parse(&format!(
-        "{{\"xrCompatible\":{}, \"antialias\": true}}",
-        "true"
+        "{{\"xrCompatible\":{xr_compatible}, \"antialias\": {antialias}, \"depth\": {depth}, \"stencil\": {stencil}}}",
     )) {
         Ok(attributes) => {
             match canvas

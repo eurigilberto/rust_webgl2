@@ -1,5 +1,3 @@
-use webgl2_shader_definition::{FunctionDefinition, FunctionDefinitionType, WebGLDataType};
-
 pub mod lighting_functions;
 
 pub mod dither{

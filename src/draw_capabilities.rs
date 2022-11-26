@@ -1,7 +1,10 @@
 use color::RGBA;
 use glam::*;
 
-use crate::{WebGlCapability, Graphics, CullMode, BlendEquation, BlendFuncFactor, StencilOp, StencilFunc, DepthFunction};
+use crate::{
+    BlendEquation, BlendFuncFactor, CullMode, DepthFunction, Graphics, StencilFunc, StencilOp,
+    WebGlCapability,
+};
 
 #[derive(Clone, Copy)]
 pub struct StencilData {
@@ -62,6 +65,19 @@ pub struct BlendState {
     pub equation: BlendEquationState,
     pub factor: BlendFactorState,
     pub blend_color: Option<RGBA>,
+}
+
+impl BlendState {
+    pub fn default_alpha() -> Self {
+        Self {
+            equation: BlendEquationState::Same(BlendEquation::FUNC_ADD),
+            factor: BlendFactorState::Same {
+                src: BlendFuncFactor::SRC_ALPHA,
+                dst: BlendFuncFactor::ONE_MINUS_SRC_ALPHA,
+            },
+            blend_color: None,
+        }
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -205,7 +221,7 @@ impl DrawCapabilities {
         }
     }
 
-    pub fn set_color_mask(&self, graphics: &Graphics){
+    pub fn set_color_mask(&self, graphics: &Graphics) {
         graphics.color_mask(
             self.color_draw_mask.0,
             self.color_draw_mask.1,
@@ -214,7 +230,7 @@ impl DrawCapabilities {
         );
     }
 
-    pub fn set_depth_mask(&self, graphics: &Graphics){
+    pub fn set_depth_mask(&self, graphics: &Graphics) {
         graphics.depth_mask(self.depth_draw_mask);
     }
 

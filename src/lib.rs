@@ -40,9 +40,9 @@ pub struct GLViewport {
     pub size: IVec2,
 }
 
-pub fn get_canvas() -> Result<HtmlCanvasElement, ()> {
+pub fn get_canvas(canvas_id: &str) -> Result<HtmlCanvasElement, ()> {
     let document = web_sys::window().unwrap().document().unwrap();
-    match document.get_element_by_id("view3d") {
+    match document.get_element_by_id(canvas_id) {
         Some(canvas_element) => match canvas_element.dyn_into() {
             Ok(canvas) => Ok(canvas),
             Err(_) => Err(()),
@@ -54,10 +54,12 @@ pub fn get_canvas() -> Result<HtmlCanvasElement, ()> {
 pub fn create_webgl2_context(
     xr_compatible: bool,
     antialias: bool,
-    depth: bool, 
-    stencil: bool
+    depth: bool,
+    stencil: bool,
+    canvas_id: &str,
 ) -> Result<(HtmlCanvasElement, web_sys::WebGl2RenderingContext), JsValue> {
-    let canvas = get_canvas().expect("Could not get the HTMLCanvasElement");
+    let canvas =
+        get_canvas(canvas_id).expect(&format!("Could not get the HTMLCanvasElement {canvas_id}"));
 
     match js_sys::JSON::parse(&format!(
         "{{\"xrCompatible\":{xr_compatible}, \"antialias\": {antialias}, \"depth\": {depth}, \"stencil\": {stencil}}}",
@@ -81,44 +83,22 @@ pub fn create_webgl2_context(
 pub struct Graphics {
     gl_context: Rc<wgl_context>,
     canvas: HtmlCanvasElement,
-    pub screen_size: glam::UVec2,
-    pub viewport_size: Vec2,
 }
 
 impl Graphics {
     pub fn new(
         render_context: wgl_context,
         canvas: web_sys::HtmlCanvasElement,
-        size: Option<UVec2>,
-        start_background_color: RGBA,
     ) -> Result<Self, ()> {
-        Self::_clear_framebuffer(
-            &render_context,
-            None,
-            Some(&start_background_color),
-            None,
-            None,
-        );
-
-        let mut _size = uvec2(0, 0);
-        if let Some(size) = size {
-            canvas.set_width(size.x);
-            canvas.set_height(size.y);
-            _size = size;
-        }
-
         Ok(Self {
             canvas,
             gl_context: Rc::new(render_context),
-            screen_size: _size,
-            viewport_size: Vec2::ZERO,
         })
     }
     #[allow(dead_code)]
     pub fn resize(&mut self, new_size: UVec2) {
         self.canvas.set_width(new_size.x);
         self.canvas.set_height(new_size.y);
-        self.screen_size = new_size;
     }
     pub fn clear_main_frameburffer(
         &self,
@@ -332,7 +312,6 @@ impl Graphics {
     }
 
     pub fn set_viewport(&mut self, position: IVec2, size: UVec2) {
-        self.viewport_size = size.as_vec2();
         self.gl_context
             .viewport(position.x, position.y, size.x as i32, size.y as i32);
     }
@@ -444,5 +423,3 @@ pub fn create_program_from_single_shader_source(
         Err(_) => Err(ProgramCreationError::SourceParsing),
     }
 }
-
-

@@ -5,6 +5,7 @@ mod constants;
 use crate::Graphics;
 pub use constants::*;
 
+#[derive(Debug, Clone, Copy)]
 pub enum FramebufferError {
     CreateBuffer,
 }

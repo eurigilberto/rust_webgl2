@@ -9,6 +9,7 @@ pub use constants::*;
 
 use crate::Graphics;
 
+#[derive(Debug, Clone, Copy)]
 pub enum GlTextureError {
     CreateObject,
 }

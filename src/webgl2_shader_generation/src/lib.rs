@@ -8,6 +8,7 @@ use std::{
 use syn::{parse_macro_input, LitStr};
 use webgl2_shader_definition::*;
 
+// Checks that the `import_file_path` is valid; if so, add the file to `promise_imports` and `function_imports`.
 fn push_file_function_imports(
     function_imports: &mut HashMap<String, FunctionImports>,
     promise_imports: &mut Vec<(String, String)>,
@@ -34,7 +35,13 @@ fn push_file_function_imports(
     }
 }
 
-fn generate_imported_functions(source_imported_fn: &Vec<FunctionDefinition>, file_dir: &path::Path) -> Vec<FunctionDefinition> {
+// Takes an array of the paths of imported functions and the path of the source that imported those
+// functions and, using this information, reads the contents of the imported files and returns the
+// array with the deserialized function definitions.
+fn generate_imported_functions(
+    source_imported_fn: &Vec<FunctionDefinition>,
+    file_dir: &path::Path,
+) -> Vec<FunctionDefinition> {
     let mut imported_fn = Vec::<FunctionDefinition>::new();
     let mut function_imports = HashMap::<String, FunctionImports>::new();
     let mut promise_imports = Vec::<(String, String)>::new();
@@ -84,20 +91,24 @@ fn generate_imported_functions(source_imported_fn: &Vec<FunctionDefinition>, fil
     imported_fn
 }
 
+// Reads the TOML shader definition in the given path and returns the compiled String of the vertex
+// shader and the fragment shader (in that order).
 fn generate_shader_str(file_path: String) -> (String, String) {
     let f_path = path::Path::new(&file_path);
+
     if f_path.is_file() && !f_path.is_absolute() {
         panic!("File path should be absolute and point to a file")
     }
+
     let file_directory = f_path.parent().unwrap();
-    //panic!("path {:?}", ances);
+
     match fs::read_to_string(f_path) {
         Ok(file_str) => match toml::from_str::<ShaderSource>(&file_str) {
             Ok(source) => {
-                let imported_fn = generate_imported_functions(&source.imported_functions, file_directory);
+                let imported_fn =
+                    generate_imported_functions(&source.imported_functions, file_directory);
                 let vertex_shader_code = generate_vertex_stage_str(&source, &imported_fn);
                 let fragment_shader_code = generate_fragment_stage_str(&source, &imported_fn);
-                //panic!("Shader code\nVertex Shader\n{}\nFragment Shader\n{}", vertex_shader_code, fragment_shader_code);
                 (vertex_shader_code, fragment_shader_code)
             }
             Err(err) => {
@@ -111,17 +122,15 @@ fn generate_shader_str(file_path: String) -> (String, String) {
 }
 
 #[proc_macro]
-pub fn generate_shader_from_yaml_file(input: TokenStream) -> TokenStream{
+pub fn generate_shader_from_yaml_file(input: TokenStream) -> TokenStream {
     let file_path: LitStr = parse_macro_input!(input as LitStr);
     let path = file_path.value();
     let file_path = path::Path::new(&path);
 
     let file_directory = file_path.parent().unwrap();
     let file_str = fs::read_to_string(file_path).expect("Could not read the shader file");
-    
-    let source: ShaderSource = serde_yaml::from_str(&file_str).expect("Could not deserialize");
 
-    //println!("{:#?}", source);
+    let source: ShaderSource = serde_yaml::from_str(&file_str).expect("Could not deserialize");
 
     let imported_fn = generate_imported_functions(&source.imported_functions, file_directory);
     let vertex_shader = generate_vertex_stage_str(&source, &imported_fn);

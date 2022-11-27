@@ -35,9 +35,9 @@ fn push_file_function_imports(
     }
 }
 
-// Takes an array of the paths of imported functions and the path of the source that imported those
-// functions and, using this information, reads the contents of the imported files and returns the
-// array with the deserialized function definitions.
+// Takes an array of Function Definitions and the path of the shader and transforms them
+// into an array of Function Definitions with type InlineFn. For the InlineFn functions in the
+// array is a simple copy, for the ImportFn, the necessary file is read.
 fn generate_imported_functions(
     source_imported_fn: &Vec<FunctionDefinition>,
     file_dir: &path::Path,
@@ -91,7 +91,7 @@ fn generate_imported_functions(
     imported_fn
 }
 
-// Reads the TOML shader definition in the given path and returns the compiled String of the vertex
+// Reads the YAML shader definition in the given path and returns the compiled String of the vertex
 // shader and the fragment shader (in that order).
 fn generate_shader_str(file_path: String) -> (String, String) {
     let f_path = path::Path::new(&file_path);

@@ -47,6 +47,7 @@ pub fn set_min_max_lod(context: &gl, target: TextureBindTarget, min_max_value: (
     context.tex_parameterf(target.into(), gl::TEXTURE_MAX_LOD, min_max_value.1);
 }
 
+#[derive(Clone, Copy)]
 pub struct Texture2DProps {
     pub wrap_x: TextureWrap,
     pub wrap_y: TextureWrap,

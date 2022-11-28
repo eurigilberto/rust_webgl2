@@ -48,13 +48,13 @@ pub fn set_min_max_lod(context: &gl, target: TextureBindTarget, min_max_value: (
 }
 
 pub struct Texture2DProps {
-    wrap_x: TextureWrap,
-    wrap_y: TextureWrap,
-    mag_filter: MagFilter,
-    min_filter: MinFilter,
-    base_level: i32,
-    max_level: i32,
-    min_max_lod: (f32, f32),
+    pub wrap_x: TextureWrap,
+    pub wrap_y: TextureWrap,
+    pub mag_filter: MagFilter,
+    pub min_filter: MinFilter,
+    pub base_level: i32,
+    pub max_level: i32,
+    pub min_max_lod: (f32, f32),
 }
 
 impl Texture2DProps {

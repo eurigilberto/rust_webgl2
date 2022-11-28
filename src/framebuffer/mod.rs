@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use web_sys::{WebGl2RenderingContext as gl, WebGlFramebuffer, WebGlTexture};
 mod constants;
-use crate::Graphics;
+use crate::{Graphics};
 pub use constants::*;
 
 #[derive(Debug, Clone, Copy)]
@@ -13,7 +13,7 @@ pub enum FramebufferError {
 pub struct Framebuffer {
     context: Rc<gl>,
     pub framebuffer: WebGlFramebuffer,
-    pub target: Option<FramebufferBindTarget>,
+    pub target: Option<FramebufferBinding>,
 }
 
 impl Framebuffer {
@@ -30,7 +30,7 @@ impl Framebuffer {
         })
     }
 
-    pub fn bind(&mut self, target: FramebufferBindTarget) {
+    pub fn bind(&mut self, target: FramebufferBinding) {
         self.unbind();
         self.context
             .bind_framebuffer(target.into(), Some(&self.framebuffer));
@@ -52,7 +52,7 @@ impl Framebuffer {
         layer: u32,
     ) {
         self.context.framebuffer_texture_layer(
-            FramebufferBindTarget::DRAW_FRAMEBUFFER.into(),
+            FramebufferBinding::DRAW_FRAMEBUFFER.into(),
             gl::COLOR_ATTACHMENT0 + color_attachment,
             texture,
             mipmap_level as i32,
@@ -62,7 +62,7 @@ impl Framebuffer {
 
     pub fn set_depth_attachment(&mut self, texture: Option<&WebGlTexture>, layer: u32) {
         self.context.framebuffer_texture_layer(
-            FramebufferBindTarget::DRAW_FRAMEBUFFER.into(),
+            FramebufferBinding::DRAW_FRAMEBUFFER.into(),
             gl::DEPTH_ATTACHMENT,
             texture,
             0,
@@ -72,7 +72,7 @@ impl Framebuffer {
 
     pub fn set_depth_stencil_attachment(&mut self, texture: Option<&WebGlTexture>, layer: u32) {
         self.context.framebuffer_texture_layer(
-            FramebufferBindTarget::DRAW_FRAMEBUFFER.into(),
+            FramebufferBinding::DRAW_FRAMEBUFFER.into(),
             gl::DEPTH_STENCIL_ATTACHMENT,
             texture,
             0,

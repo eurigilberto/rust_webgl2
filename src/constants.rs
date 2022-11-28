@@ -299,20 +299,7 @@ impl Into<u32> for IndexType{
     }
 }
 
-#[allow(dead_code)]
-#[derive(Clone, Copy)]
-pub struct FramebufferBinding(u32);
-#[allow(dead_code)]
-impl FramebufferBinding{
-	pub const FRAMEBUFFER: FramebufferBinding = FramebufferBinding(wgl_context::FRAMEBUFFER);
-	pub const DRAW_FRAMEBUFFER: FramebufferBinding = FramebufferBinding(wgl_context::DRAW_FRAMEBUFFER);
-	pub const READ_FRAMEBUFFER: FramebufferBinding = FramebufferBinding(wgl_context::READ_FRAMEBUFFER);
-}
-impl Into<u32> for FramebufferBinding{
-    fn into(self) -> u32 {
-        self.0
-    }
-}
+
 
 #[allow(dead_code)]
 #[derive(Clone, Copy)]

@@ -161,7 +161,7 @@ impl Graphics {
         depth: Option<f32>,
         stencil: Option<u32>,
     ) {
-        context.bind_framebuffer(FramebufferBinding::FRAMEBUFFER.into(), framebuffer);
+        context.bind_framebuffer(FramebufferBinding::DRAW_FRAMEBUFFER.into(), framebuffer);
         Self::_clear_current_framebuffer(context, color, depth, stencil)
     }
 

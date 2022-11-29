@@ -32,12 +32,11 @@ pub enum WebGLDataType {
     Mat4,
 }
 
-// source: https://registry.khronos.org/OpenGL/specs/gl/GLSLangSpec.4.60.pdf (page 94)
+// source: https://www.khronos.org/files/webgl20-reference-guide.pdf
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub enum InterpolationQualifier {
     Smooth,
     Flat,
-    Noperspective,
 }
 
 impl InterpolationQualifier {
@@ -45,7 +44,6 @@ impl InterpolationQualifier {
         match self {
             InterpolationQualifier::Smooth => "smooth",
             InterpolationQualifier::Flat => "flat",
-            InterpolationQualifier::Noperspective => "noperspective",
         }
     }
 }

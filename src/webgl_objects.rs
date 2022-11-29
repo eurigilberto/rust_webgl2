@@ -298,6 +298,7 @@ impl GlShader {
     }
 }
 
+#[derive(Clone, Copy)]
 pub enum FloatUniform {
     Scalar(f32),
     Vec2(glam::Vec2),
@@ -342,6 +343,7 @@ impl From<FloatUniform> for GlUniform {
     }
 }
 
+#[derive(Clone, Copy)]
 pub enum IntUniform {
     Scalar(i32),
     Vec2(glam::IVec2),
@@ -375,6 +377,7 @@ impl From<IntUniform> for GlUniform {
     }
 }
 
+#[derive(Clone, Copy)]
 pub enum UIntUniform {
     Scalar(u32),
     Vec2(glam::UVec2),
@@ -408,6 +411,7 @@ impl From<UIntUniform> for GlUniform {
     }
 }
 
+#[derive(Clone, Copy)]
 pub enum GlUniform {
     Float(FloatUniform),
     Int(IntUniform),

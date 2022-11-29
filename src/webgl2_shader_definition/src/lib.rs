@@ -32,6 +32,24 @@ pub enum WebGLDataType {
     Mat4,
 }
 
+// source: https://registry.khronos.org/OpenGL/specs/gl/GLSLangSpec.4.60.pdf (page 94)
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub enum InterpolationQualifier {
+    Smooth,
+    Flat,
+    Noperspective,
+}
+
+impl InterpolationQualifier {
+    pub fn as_str<'ret, 'b>(&'b self) -> &'ret str {
+        match self {
+            InterpolationQualifier::Smooth => "smooth",
+            InterpolationQualifier::Flat => "flat",
+            InterpolationQualifier::Noperspective => "noperspective",
+        }
+    }
+}
+
 impl WebGLDataType {
     pub fn as_str<'ret, 'b>(&'b self) -> &'ret str {
         match self {
@@ -82,7 +100,7 @@ impl ShaderAttribute{
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ShaderVarying {
-    pub interp: Option<String>,
+    pub interp: Option<InterpolationQualifier>,
     pub kind: WebGLDataType,
     pub name: String,
 }
@@ -287,25 +305,29 @@ fn push_main_function(shader_code: &mut String, main_fn: &String) {
     shader_code.extend(main_function.chars());
 }
 
+// Adds varyings to the shaders code (string)
 fn push_varying(shader_code: &mut String, is_input: bool, varyings: &Vec<ShaderVarying>) {
     for vary in varyings {
-        if vary.interp.is_none() {
-            let vary_str = format!(
-                "{} {} {};\n",
-                if is_input { "in" } else { "out" },
-                vary.kind.as_str(),
-                vary.name
-            );
-            shader_code.extend(vary_str.chars());
-        } else {
-            let vary_str = format!(
-                "{} {} {} {};\n",
-                vary.interp.as_ref().unwrap(),
-                if is_input { "in" } else { "out" },
-                vary.kind.as_str(),
-                vary.name
-            );
-            shader_code.extend(vary_str.chars());
+        match vary.interp {
+            Some(value) => {
+                let vary_str = format!(
+                    "{} {} {} {};\n",
+                    value.as_str(),
+                    if is_input { "in" } else { "out" },
+                    vary.kind.as_str(),
+                    vary.name
+                );
+                shader_code.extend(vary_str.chars());
+            }
+            None => {
+                let vary_str = format!(
+                    "{} {} {};\n",
+                    if is_input { "in" } else { "out" },
+                    vary.kind.as_str(),
+                    vary.name
+                );
+                shader_code.extend(vary_str.chars());
+            }
         }
     }
 }

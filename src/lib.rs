@@ -18,6 +18,7 @@ mod constants;
 pub use constants::*;
 mod webgl_objects;
 pub use webgl2_shader_definition::*;
+pub use webgl2_shader_generation::*;
 pub use webgl_objects::*;
 mod material;
 pub mod shader_functions;

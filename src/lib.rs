@@ -102,7 +102,7 @@ impl Graphics {
     }
     pub fn clear_main_frameburffer(
         &self,
-        color: Option<&RGBA>,
+        color: Option<RGBA>,
         depth: Option<f32>,
         stencil: Option<u32>,
     ) {
@@ -112,7 +112,7 @@ impl Graphics {
     pub fn clear_framebuffer(
         &self,
         framebuffer: Option<&WebGlFramebuffer>,
-        color: Option<&RGBA>,
+        color: Option<RGBA>,
         depth: Option<f32>,
         stencil: Option<u32>,
     ) {
@@ -121,7 +121,7 @@ impl Graphics {
 
     pub fn clear_current_framebuffer(
         &self,
-        color: Option<&RGBA>,
+        color: Option<RGBA>,
         depth: Option<f32>,
         stencil: Option<u32>,
     ) {
@@ -130,7 +130,7 @@ impl Graphics {
 
     pub fn _clear_current_framebuffer(
         context: &wgl_context,
-        color: Option<&RGBA>,
+        color: Option<RGBA>,
         depth: Option<f32>,
         stencil: Option<u32>,
     ) {
@@ -157,7 +157,7 @@ impl Graphics {
     fn _clear_framebuffer(
         context: &wgl_context,
         framebuffer: Option<&WebGlFramebuffer>,
-        color: Option<&RGBA>,
+        color: Option<RGBA>,
         depth: Option<f32>,
         stencil: Option<u32>,
     ) {

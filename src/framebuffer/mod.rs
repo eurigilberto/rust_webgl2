@@ -52,25 +52,28 @@ impl Framebuffer {
         layer: u32,
     ) {
         self.bind(FramebufferBinding::DRAW_FRAMEBUFFER);
-        /*self.context.framebuffer_texture_2d(
-            FramebufferBinding::DRAW_FRAMEBUFFER.into(),
-            gl::COLOR_ATTACHMENT0 + color_attachment,
-            TextureBindTarget::TEXTURE_2D.into(),
-            texture,
-            0,
-        );*/
         let mut tx = None;
         if let Some(texture) = texture{
             texture.bind();
             tx = Some(&texture.texture);
         }
-        self.context.framebuffer_texture_layer(
+        
+        self.context.framebuffer_texture_2d(
+            FramebufferBinding::DRAW_FRAMEBUFFER.into(),
+            gl::COLOR_ATTACHMENT0 + color_attachment,
+            TextureBindTarget::TEXTURE_2D.into(),
+            tx,
+            0,
+        );
+        
+        /*self.context.framebuffer_texture_layer(
             FramebufferBinding::DRAW_FRAMEBUFFER.into(),
             gl::COLOR_ATTACHMENT0 + color_attachment,
             tx,
             mipmap_level as i32,
             layer as i32,
-        );
+        ); */
+
         if let Some(texture) = texture{
             texture.unbind();
         }

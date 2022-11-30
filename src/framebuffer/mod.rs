@@ -14,7 +14,7 @@ pub enum FramebufferError {
 pub struct Framebuffer {
     context: Rc<gl>,
     pub framebuffer: WebGlFramebuffer,
-    pub target: RefCell<Option<FramebufferBinding>>,
+    target: RefCell<Option<FramebufferBinding>>,
 }
 
 #[derive(Clone, Copy)]
@@ -51,10 +51,11 @@ impl Framebuffer {
     }
 
     pub fn unbind(&self) {
-        if let Some(target) = *self.target.borrow() {
+        let target = *self.target.borrow_mut();
+        if let Some(target) = target {
             self.context.bind_framebuffer(target.into(), None);
-            self.target.replace(None);
         }
+        self.target.replace(None);
     }
 
     fn set_attachment(&mut self, attachment_index: u32, texture: Option<&GlTexture2D>) {

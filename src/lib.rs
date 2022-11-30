@@ -313,7 +313,7 @@ impl Graphics {
         self.gl_context.depth_range(near, far);
     }
 
-    pub fn set_viewport(&mut self, position: IVec2, size: UVec2) {
+    pub fn set_viewport(&self, position: IVec2, size: UVec2) {
         self.gl_context
             .viewport(position.x, position.y, size.x as i32, size.y as i32);
     }

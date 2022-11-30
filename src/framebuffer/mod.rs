@@ -71,6 +71,9 @@ impl Framebuffer {
             mipmap_level as i32,
             layer as i32,
         );
+        if let Some(texture) = texture{
+            texture.unbind();
+        }
         self.unbind();
     }
 

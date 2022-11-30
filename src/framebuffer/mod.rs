@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use web_sys::{WebGl2RenderingContext as gl, WebGlFramebuffer, WebGlTexture};
 mod constants;
-use crate::{Graphics, TextureBindTarget, GlTexture2D};
+use crate::{GlTexture2D, Graphics, TextureBindTarget};
 pub use constants::*;
 
 #[derive(Debug, Clone, Copy)]
@@ -44,64 +44,38 @@ impl Framebuffer {
         }
     }
 
-    pub fn set_color_attachment(
-        &mut self,
-        color_attachment: u32,
-        texture: Option<&GlTexture2D>,
-        mipmap_level: u32,
-        layer: u32,
-    ) {
+    fn set_attachment(&mut self, attachment_index: u32, texture: Option<&GlTexture2D>) {
         self.bind(FramebufferBinding::DRAW_FRAMEBUFFER);
         let mut tx = None;
-        if let Some(texture) = texture{
+        if let Some(texture) = texture {
             texture.bind();
             tx = Some(&texture.texture);
         }
-        
+
         self.context.framebuffer_texture_2d(
             FramebufferBinding::DRAW_FRAMEBUFFER.into(),
-            gl::COLOR_ATTACHMENT0 + color_attachment,
+            attachment_index,
             TextureBindTarget::TEXTURE_2D.into(),
             tx,
             0,
         );
-        
-        /*self.context.framebuffer_texture_layer(
-            FramebufferBinding::DRAW_FRAMEBUFFER.into(),
-            gl::COLOR_ATTACHMENT0 + color_attachment,
-            tx,
-            mipmap_level as i32,
-            layer as i32,
-        ); */
 
-        if let Some(texture) = texture{
+        if let Some(texture) = texture {
             texture.unbind();
         }
         self.unbind();
     }
 
-    pub fn set_depth_attachment(&mut self, texture: Option<&WebGlTexture>, layer: u32) {
-        self.bind(FramebufferBinding::DRAW_FRAMEBUFFER);
-        self.context.framebuffer_texture_layer(
-            FramebufferBinding::DRAW_FRAMEBUFFER.into(),
-            gl::DEPTH_ATTACHMENT,
-            texture,
-            0,
-            layer as i32,
-        );
-        self.unbind();
+    pub fn set_color_attachment(&mut self, color_attachment: u32, texture: Option<&GlTexture2D>) {
+        self.set_attachment(gl::COLOR_ATTACHMENT0 + color_attachment, texture);
     }
 
-    pub fn set_depth_stencil_attachment(&mut self, texture: Option<&WebGlTexture>, layer: u32) {
-        self.bind(FramebufferBinding::DRAW_FRAMEBUFFER);
-        self.context.framebuffer_texture_layer(
-            FramebufferBinding::DRAW_FRAMEBUFFER.into(),
-            gl::DEPTH_STENCIL_ATTACHMENT,
-            texture,
-            0,
-            layer as i32,
-        );
-        self.unbind();
+    pub fn set_depth_attachment(&mut self, texture: Option<&GlTexture2D>) {
+        self.set_attachment(gl::DEPTH_ATTACHMENT, texture);
+    }
+
+    pub fn set_depth_stencil_attachment(&mut self, texture: Option<&GlTexture2D>) {
+        self.set_attachment(gl::DEPTH_STENCIL_ATTACHMENT, texture);
     }
 }
 

@@ -51,16 +51,19 @@ impl Framebuffer {
         mipmap_level: u32,
         layer: u32,
     ) {
+        self.bind(FramebufferBinding::DRAW_FRAMEBUFFER);
         self.context.framebuffer_texture_layer(
             FramebufferBinding::DRAW_FRAMEBUFFER.into(),
             gl::COLOR_ATTACHMENT0 + color_attachment,
             texture,
             mipmap_level as i32,
             layer as i32,
-        )
+        );
+        self.unbind();
     }
 
     pub fn set_depth_attachment(&mut self, texture: Option<&WebGlTexture>, layer: u32) {
+        self.bind(FramebufferBinding::DRAW_FRAMEBUFFER);
         self.context.framebuffer_texture_layer(
             FramebufferBinding::DRAW_FRAMEBUFFER.into(),
             gl::DEPTH_ATTACHMENT,
@@ -68,16 +71,19 @@ impl Framebuffer {
             0,
             layer as i32,
         );
+        self.unbind();
     }
 
     pub fn set_depth_stencil_attachment(&mut self, texture: Option<&WebGlTexture>, layer: u32) {
+        self.bind(FramebufferBinding::DRAW_FRAMEBUFFER);
         self.context.framebuffer_texture_layer(
             FramebufferBinding::DRAW_FRAMEBUFFER.into(),
             gl::DEPTH_STENCIL_ATTACHMENT,
             texture,
             0,
             layer as i32,
-        )
+        );
+        self.unbind();
     }
 }
 

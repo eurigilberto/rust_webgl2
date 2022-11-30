@@ -18,8 +18,8 @@ pub struct Framebuffer {
 }
 
 pub struct Viewport {
-    position: UVec2,
-    size: UVec2,
+    pub position: UVec2,
+    pub size: UVec2,
 }
 
 impl Framebuffer {

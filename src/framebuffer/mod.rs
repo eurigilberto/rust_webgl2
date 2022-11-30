@@ -124,15 +124,23 @@ impl Framebuffer {
             mask = mask | FramebufferMaskBits::STENCIL_BUFFER_BIT.value()
         };
 
+        let src_min = src_viewport.position.as_ivec2();
+        let src_max = src_min + src_viewport.size.as_ivec2();
+
+        let dst_min = dst_viewport.position.as_ivec2();
+        let dst_max = dst_min + dst_viewport.size.as_ivec2();
+
         graphics.gl_context.blit_framebuffer(
-            src_viewport.position.x as i32,
-            src_viewport.position.y as i32,
-            src_viewport.size.x as i32,
-            src_viewport.size.y as i32,
-            dst_viewport.position.x as i32,
-            dst_viewport.position.y as i32,
-            dst_viewport.size.x as i32,
-            dst_viewport.size.y as i32,
+            src_min.x,
+            src_min.y,
+            src_max.x,
+            src_max.y,
+            //----
+            dst_min.x,
+            dst_min.y,
+            dst_max.x,
+            dst_max.y,
+            //----
             mask,
             filter.into(),
         )

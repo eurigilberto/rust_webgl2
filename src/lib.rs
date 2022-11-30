@@ -17,15 +17,12 @@ pub use limits::*;
 mod constants;
 pub use constants::*;
 mod webgl_objects;
-pub use shader_def::*;
-use webgl2_shader_definition as shader_def;
+use webgl2_shader_definition::*;
 pub use webgl_objects::*;
 mod material;
 pub mod shader_functions;
 pub use material::*;
 pub use shader_functions::*;
-pub use webgl2_shader_definition;
-pub use webgl2_shader_generation;
 mod draw_capabilities;
 pub use draw_capabilities::*;
 mod texture;
@@ -175,30 +172,30 @@ impl Graphics {
 impl From<WebGLDataType> for GlUniform {
     fn from(uniform: WebGLDataType) -> Self {
         match uniform {
-            shader_def::WebGLDataType::Void => panic!("Cannot transform void"),
+            WebGLDataType::Void => panic!("Cannot transform void"),
 
-            shader_def::WebGLDataType::Float => GlUniform::Float(FloatUniform::Scalar(0.0)),
-            shader_def::WebGLDataType::Vec2 => GlUniform::Float(FloatUniform::Vec2(Vec2::ZERO)),
-            shader_def::WebGLDataType::Vec3 => GlUniform::Float(FloatUniform::Vec3(Vec3::ZERO)),
-            shader_def::WebGLDataType::Vec4 => GlUniform::Float(FloatUniform::Vec4(Vec4::ZERO)),
-            shader_def::WebGLDataType::Mat2 => GlUniform::Float(FloatUniform::Mat2(Mat2::IDENTITY)),
-            shader_def::WebGLDataType::Mat3 => GlUniform::Float(FloatUniform::Mat3(Mat3::IDENTITY)),
-            shader_def::WebGLDataType::Mat4 => GlUniform::Float(FloatUniform::Mat4(Mat4::IDENTITY)),
+            WebGLDataType::Float => GlUniform::Float(FloatUniform::Scalar(0.0)),
+            WebGLDataType::Vec2 => GlUniform::Float(FloatUniform::Vec2(Vec2::ZERO)),
+            WebGLDataType::Vec3 => GlUniform::Float(FloatUniform::Vec3(Vec3::ZERO)),
+            WebGLDataType::Vec4 => GlUniform::Float(FloatUniform::Vec4(Vec4::ZERO)),
+            WebGLDataType::Mat2 => GlUniform::Float(FloatUniform::Mat2(Mat2::IDENTITY)),
+            WebGLDataType::Mat3 => GlUniform::Float(FloatUniform::Mat3(Mat3::IDENTITY)),
+            WebGLDataType::Mat4 => GlUniform::Float(FloatUniform::Mat4(Mat4::IDENTITY)),
 
-            shader_def::WebGLDataType::Bool => todo!("I am not sure if boolean are useful"),
-            shader_def::WebGLDataType::BVec2 => todo!("I am not sure if boolean are useful"),
-            shader_def::WebGLDataType::BVec3 => todo!("I am not sure if boolean are useful"),
-            shader_def::WebGLDataType::BVec4 => todo!("I am not sure if boolean are useful"),
+            WebGLDataType::Bool => todo!("I am not sure if boolean are useful"),
+            WebGLDataType::BVec2 => todo!("I am not sure if boolean are useful"),
+            WebGLDataType::BVec3 => todo!("I am not sure if boolean are useful"),
+            WebGLDataType::BVec4 => todo!("I am not sure if boolean are useful"),
 
-            shader_def::WebGLDataType::Int => GlUniform::Int(IntUniform::Scalar(0)),
-            shader_def::WebGLDataType::IVec2 => GlUniform::Int(IntUniform::Vec2(IVec2::ZERO)),
-            shader_def::WebGLDataType::IVec3 => GlUniform::Int(IntUniform::Vec3(IVec3::ZERO)),
-            shader_def::WebGLDataType::IVec4 => GlUniform::Int(IntUniform::Vec4(IVec4::ZERO)),
+            WebGLDataType::Int => GlUniform::Int(IntUniform::Scalar(0)),
+            WebGLDataType::IVec2 => GlUniform::Int(IntUniform::Vec2(IVec2::ZERO)),
+            WebGLDataType::IVec3 => GlUniform::Int(IntUniform::Vec3(IVec3::ZERO)),
+            WebGLDataType::IVec4 => GlUniform::Int(IntUniform::Vec4(IVec4::ZERO)),
 
-            shader_def::WebGLDataType::Uint => GlUniform::UInt(UIntUniform::Scalar(0)),
-            shader_def::WebGLDataType::UVec2 => GlUniform::UInt(UIntUniform::Vec2(UVec2::ZERO)),
-            shader_def::WebGLDataType::UVec3 => GlUniform::UInt(UIntUniform::Vec3(UVec3::ZERO)),
-            shader_def::WebGLDataType::UVec4 => GlUniform::UInt(UIntUniform::Vec4(UVec4::ZERO)),
+            WebGLDataType::Uint => GlUniform::UInt(UIntUniform::Scalar(0)),
+            WebGLDataType::UVec2 => GlUniform::UInt(UIntUniform::Vec2(UVec2::ZERO)),
+            WebGLDataType::UVec3 => GlUniform::UInt(UIntUniform::Vec3(UVec3::ZERO)),
+            WebGLDataType::UVec4 => GlUniform::UInt(UIntUniform::Vec4(UVec4::ZERO)),
         }
     }
 }

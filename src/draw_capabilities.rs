@@ -86,6 +86,7 @@ pub struct Scissor {
     pub size: IVec2,
 }
 
+#[derive(Clone, Copy)]
 pub struct DrawCapabilities {
     pub blend_state: Option<BlendState>,
     pub cull_face: Option<CullMode>,

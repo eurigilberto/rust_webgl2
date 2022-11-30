@@ -92,6 +92,7 @@ pub struct GlTexture2D {
     pub texture: WebGlTexture,
     pub format: TextureInternalFormat,
     pub size: UVec2,
+    pub mipmap: Option<u32>
 }
 
 impl GlTexture2D {
@@ -100,6 +101,7 @@ impl GlTexture2D {
         props: Texture2DProps,
         size: UVec2,
         format: TextureInternalFormat,
+        mipmap: Option<u32>
     ) -> Result<Self, GlTextureError> {
         let gl = graphics.get_gl_context_clone();
         let texture = match gl.create_texture() {
@@ -112,7 +114,7 @@ impl GlTexture2D {
 
         gl.tex_storage_2d(
             TextureBindTarget::TEXTURE_2D.into(),
-            0,
+            (1 + mipmap.unwrap_or(0)) as i32,
             format.into(),
             size.x as i32,
             size.y as i32,
@@ -128,6 +130,7 @@ impl GlTexture2D {
             context: graphics.gl_context.clone(),
             format,
             size,
+            mipmap
         })
     }
 

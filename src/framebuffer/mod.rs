@@ -1,7 +1,7 @@
-use std::rc::Rc;
+use std::{rc::Rc, cell::RefCell};
 
 use glam::UVec2;
-use web_sys::{WebGl2RenderingContext as gl, WebGlFramebuffer, WebGlTexture};
+use web_sys::{WebGl2RenderingContext as gl, WebGlFramebuffer};
 mod constants;
 use crate::{FramebufferMaskBits, GlTexture2D, Graphics, MagFilter, TextureBindTarget};
 pub use constants::*;
@@ -14,7 +14,7 @@ pub enum FramebufferError {
 pub struct Framebuffer {
     context: Rc<gl>,
     pub framebuffer: WebGlFramebuffer,
-    pub target: Option<FramebufferBinding>,
+    pub target: RefCell<Option<FramebufferBinding>>,
 }
 
 pub struct Viewport {
@@ -32,27 +32,27 @@ impl Framebuffer {
         Ok(Self {
             context: graphics.gl_context.clone(),
             framebuffer,
-            target: None,
+            target: RefCell::new(None),
         })
     }
 
-    pub fn bind(&mut self, target: FramebufferBinding) {
+    pub fn bind(&self, target: FramebufferBinding) {
         self.unbind();
         self.context.bind_framebuffer(
             target.into(),
             Some(&self.framebuffer),
         );
-        self.target = Some(target);
+        self.target.replace(Some(target));
     }
 
     pub fn bind_none(context: &gl, target: FramebufferBinding){
         context.bind_framebuffer(target.into(), None);
     }
 
-    pub fn unbind(&mut self) {
-        if let Some(target) = self.target {
+    pub fn unbind(&self) {
+        if let Some(target) = *self.target.borrow() {
             self.context.bind_framebuffer(target.into(), None);
-            self.target = None;
+            self.target.replace(None);
         }
     }
 
@@ -92,7 +92,7 @@ impl Framebuffer {
 
     pub fn blit_framebuffer(
         graphics: &Graphics,
-        src: Option<&mut Framebuffer>,
+        src: Option<&Framebuffer>,
         src_viewport: Viewport,
         dst: Option<&mut Framebuffer>,
         dst_viewport: Viewport,

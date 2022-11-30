@@ -33,6 +33,8 @@ pub use texture::*;
 
 mod framebuffer;
 pub use framebuffer::*;
+mod util;
+pub use util::*;
 
 #[allow(dead_code)]
 pub struct GLViewport {

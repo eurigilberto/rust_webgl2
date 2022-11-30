@@ -137,15 +137,15 @@ impl Graphics {
         let mut clear_mask = 0;
         if let Some(c) = color {
             context.clear_color(c.r, c.g, c.b, c.a);
-            clear_mask |= ClearMaskBits::COLOR_BUFFER_BIT.value();
+            clear_mask |= FramebufferMaskBits::COLOR_BUFFER_BIT.value();
         }
         if let Some(d) = depth {
             context.clear_depth(d);
-            clear_mask |= ClearMaskBits::DEPTH_BUFFER_BIT.value();
+            clear_mask |= FramebufferMaskBits::DEPTH_BUFFER_BIT.value();
         }
         if let Some(s) = stencil {
             context.clear_stencil(s as i32);
-            clear_mask |= ClearMaskBits::STENCIL_BUFFER_BIT.value();
+            clear_mask |= FramebufferMaskBits::STENCIL_BUFFER_BIT.value();
         }
         if clear_mask != 0 {
             context.clear(clear_mask);

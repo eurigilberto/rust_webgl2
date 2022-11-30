@@ -1,8 +1,9 @@
 use std::rc::Rc;
 
+use glam::UVec2;
 use web_sys::{WebGl2RenderingContext as gl, WebGlFramebuffer, WebGlTexture};
 mod constants;
-use crate::{GlTexture2D, Graphics, TextureBindTarget};
+use crate::{FramebufferMaskBits, GlTexture2D, Graphics, MagFilter, TextureBindTarget};
 pub use constants::*;
 
 #[derive(Debug, Clone, Copy)]
@@ -14,6 +15,11 @@ pub struct Framebuffer {
     context: Rc<gl>,
     pub framebuffer: WebGlFramebuffer,
     pub target: Option<FramebufferBinding>,
+}
+
+pub struct Viewport {
+    position: UVec2,
+    size: UVec2,
 }
 
 impl Framebuffer {
@@ -32,9 +38,15 @@ impl Framebuffer {
 
     pub fn bind(&mut self, target: FramebufferBinding) {
         self.unbind();
-        self.context
-            .bind_framebuffer(target.into(), Some(&self.framebuffer));
+        self.context.bind_framebuffer(
+            target.into(),
+            Some(&self.framebuffer),
+        );
         self.target = Some(target);
+    }
+
+    pub fn bind_none(context: &gl, target: FramebufferBinding){
+        context.bind_framebuffer(target.into(), None);
     }
 
     pub fn unbind(&mut self) {
@@ -76,6 +88,52 @@ impl Framebuffer {
 
     pub fn set_depth_stencil_attachment(&mut self, texture: Option<&GlTexture2D>) {
         self.set_attachment(gl::DEPTH_STENCIL_ATTACHMENT, texture);
+    }
+
+    pub fn blit_framebuffer(
+        graphics: &Graphics,
+        src: Option<&mut Framebuffer>,
+        src_viewport: Viewport,
+        dst: Option<&mut Framebuffer>,
+        dst_viewport: Viewport,
+        copy_color: bool,
+        copy_depth: bool,
+        copy_stencil: bool,
+        filter: MagFilter,
+    ) {
+        match src {
+            Some(src) => src.bind(FramebufferBinding::READ_FRAMEBUFFER),
+            None => Self::bind_none(&graphics.gl_context, FramebufferBinding::READ_FRAMEBUFFER),
+        }
+
+        match dst{
+            Some(dst) => dst.bind(FramebufferBinding::DRAW_FRAMEBUFFER),
+            None => Self::bind_none(&graphics.gl_context, FramebufferBinding::DRAW_FRAMEBUFFER),
+        }
+
+        let mut mask = 0;
+        if copy_color {
+            mask = mask | FramebufferMaskBits::COLOR_BUFFER_BIT.value()
+        };
+        if copy_depth {
+            mask = mask | FramebufferMaskBits::DEPTH_BUFFER_BIT.value()
+        };
+        if copy_stencil {
+            mask = mask | FramebufferMaskBits::STENCIL_BUFFER_BIT.value()
+        };
+
+        graphics.gl_context.blit_framebuffer(
+            src_viewport.position.x as i32,
+            src_viewport.position.y as i32,
+            src_viewport.size.x as i32,
+            src_viewport.size.y as i32,
+            dst_viewport.position.x as i32,
+            dst_viewport.position.y as i32,
+            dst_viewport.size.x as i32,
+            dst_viewport.size.y as i32,
+            mask,
+            filter.into(),
+        )
     }
 }
 

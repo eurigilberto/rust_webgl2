@@ -332,17 +332,17 @@ impl Into<u32> for FrontFaceWinding{
 
 #[allow(dead_code)]
 #[derive(Clone, Copy)]
-pub struct ClearMaskBits(u32);
+pub struct FramebufferMaskBits(u32);
 #[allow(dead_code)]
-impl ClearMaskBits{
-    pub const COLOR_BUFFER_BIT: ClearMaskBits = ClearMaskBits(wgl_context::COLOR_BUFFER_BIT);
-    pub const DEPTH_BUFFER_BIT: ClearMaskBits = ClearMaskBits(wgl_context::DEPTH_BUFFER_BIT);
-    pub const STENCIL_BUFFER_BIT: ClearMaskBits = ClearMaskBits(wgl_context::STENCIL_BUFFER_BIT);
+impl FramebufferMaskBits{
+    pub const COLOR_BUFFER_BIT: FramebufferMaskBits = FramebufferMaskBits(wgl_context::COLOR_BUFFER_BIT);
+    pub const DEPTH_BUFFER_BIT: FramebufferMaskBits = FramebufferMaskBits(wgl_context::DEPTH_BUFFER_BIT);
+    pub const STENCIL_BUFFER_BIT: FramebufferMaskBits = FramebufferMaskBits(wgl_context::STENCIL_BUFFER_BIT);
     pub const fn value(self)->u32{
         self.0
     }
 }
-impl Into<u32> for ClearMaskBits{
+impl Into<u32> for FramebufferMaskBits{
     fn into(self) -> u32 {
         self.0
     }

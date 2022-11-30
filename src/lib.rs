@@ -17,7 +17,7 @@ pub use limits::*;
 mod constants;
 pub use constants::*;
 mod webgl_objects;
-use webgl2_shader_definition::*;
+pub use webgl2_shader_definition::*;
 pub use webgl_objects::*;
 mod material;
 pub mod shader_functions;

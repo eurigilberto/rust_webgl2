@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use web_sys::{WebGl2RenderingContext as gl, WebGlFramebuffer, WebGlTexture};
 mod constants;
-use crate::{Graphics};
+use crate::{Graphics, TextureBindTarget, GlTexture2D};
 pub use constants::*;
 
 #[derive(Debug, Clone, Copy)]
@@ -47,15 +47,27 @@ impl Framebuffer {
     pub fn set_color_attachment(
         &mut self,
         color_attachment: u32,
-        texture: Option<&WebGlTexture>,
+        texture: Option<&GlTexture2D>,
         mipmap_level: u32,
         layer: u32,
     ) {
         self.bind(FramebufferBinding::DRAW_FRAMEBUFFER);
+        /*self.context.framebuffer_texture_2d(
+            FramebufferBinding::DRAW_FRAMEBUFFER.into(),
+            gl::COLOR_ATTACHMENT0 + color_attachment,
+            TextureBindTarget::TEXTURE_2D.into(),
+            texture,
+            0,
+        );*/
+        let mut tx = None;
+        if let Some(texture) = texture{
+            texture.bind();
+            tx = Some(&texture.texture);
+        }
         self.context.framebuffer_texture_layer(
             FramebufferBinding::DRAW_FRAMEBUFFER.into(),
             gl::COLOR_ATTACHMENT0 + color_attachment,
-            texture,
+            tx,
             mipmap_level as i32,
             layer as i32,
         );
@@ -87,10 +99,9 @@ impl Framebuffer {
     }
 }
 
-
-impl Drop for Framebuffer{
+impl Drop for Framebuffer {
     fn drop(&mut self) {
         self.unbind();
-		self.context.delete_framebuffer(Some(&self.framebuffer))
+        self.context.delete_framebuffer(Some(&self.framebuffer))
     }
 }

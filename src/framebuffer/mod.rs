@@ -35,13 +35,13 @@ pub struct FBBindableWrapper{
     pub framebuffer: WebGlFramebuffer,
 }
 
-impl FramebufferBindable for FBBindableWrapper{
+impl FramebufferBindable for &FBBindableWrapper{
     fn bind(&self, graphics: &Graphics, target: FramebufferBinding) {
         graphics.bind_framebuffer(target, Some(&self.framebuffer))
     }
 }
 
-impl FramebufferBindable for Framebuffer{
+impl FramebufferBindable for &Framebuffer{
     fn bind(&self, graphics: &Graphics, target: FramebufferBinding) {
         graphics.bind_framebuffer(target, Some(&self.framebuffer))
     }

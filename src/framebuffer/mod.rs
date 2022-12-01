@@ -27,6 +27,26 @@ pub enum FramebufferAttachment {
     DepthStencil,
 }
 
+pub trait FramebufferBindable{
+    fn bind(&self, graphics: &Graphics, target: FramebufferBinding);
+}
+
+pub struct FBBindableWrapper{
+    pub framebuffer: WebGlFramebuffer,
+}
+
+impl FramebufferBindable for FBBindableWrapper{
+    fn bind(&self, graphics: &Graphics, target: FramebufferBinding) {
+        graphics.bind_framebuffer(target, Some(&self.framebuffer))
+    }
+}
+
+impl FramebufferBindable for Framebuffer{
+    fn bind(&self, graphics: &Graphics, target: FramebufferBinding) {
+        graphics.bind_framebuffer(target, Some(&self.framebuffer))
+    }
+}
+
 pub struct Framebuffer {
     context: Rc<gl>,
     pub framebuffer: WebGlFramebuffer,
@@ -45,6 +65,14 @@ impl Framebuffer {
             framebuffer,
             target: RefCell::new(None),
         })
+    }
+
+    pub fn from(graphics: &Graphics, framebuffer: WebGlFramebuffer)->Self{
+        Self{
+            context: graphics.get_gl_context_clone(),
+            framebuffer,
+            target: RefCell::new(None)
+        }
     }
 
     pub fn bind(&self, target: FramebufferBinding) {
@@ -125,9 +153,9 @@ impl Framebuffer {
 
     pub fn blit_framebuffer(
         graphics: &Graphics,
-        src: Option<&Framebuffer>,
+        src: Option<&dyn FramebufferBindable>,
         src_viewport: Viewport,
-        dst: Option<&mut Framebuffer>,
+        dst: Option<&dyn FramebufferBindable>,
         dst_viewport: Viewport,
         copy_color: bool,
         copy_depth: bool,
@@ -135,12 +163,12 @@ impl Framebuffer {
         filter: MagFilter,
     ) {
         match src {
-            Some(src) => src.bind(FramebufferBinding::READ_FRAMEBUFFER),
+            Some(src) => src.bind(graphics, FramebufferBinding::READ_FRAMEBUFFER),
             None => Self::bind_none(&graphics.gl_context, FramebufferBinding::READ_FRAMEBUFFER),
         }
 
         match dst {
-            Some(dst) => dst.bind(FramebufferBinding::DRAW_FRAMEBUFFER),
+            Some(dst) => dst.bind(graphics, FramebufferBinding::DRAW_FRAMEBUFFER),
             None => Self::bind_none(&graphics.gl_context, FramebufferBinding::DRAW_FRAMEBUFFER),
         }
 

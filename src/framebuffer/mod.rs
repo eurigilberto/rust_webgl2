@@ -21,10 +21,10 @@ pub struct Viewport {
 }
 
 #[derive(Clone, Copy)]
-pub enum FramebufferAttachment{
+pub enum FramebufferAttachment {
     Color(u32),
     Depth,
-    DepthStencil
+    DepthStencil,
 }
 
 pub struct Framebuffer {
@@ -66,7 +66,11 @@ impl Framebuffer {
         self.target.replace(None);
     }
 
-    fn set_attachment(&mut self, attachment_index: u32, texture: Option<&GlTexture2D>) {
+    pub fn set_attachment_texture2d(
+        &mut self,
+        attachment: FramebufferAttachment,
+        texture: Option<&GlTexture2D>,
+    ) {
         self.bind(FramebufferBinding::DRAW_FRAMEBUFFER);
         let mut tx = None;
         if let Some(texture) = texture {
@@ -76,7 +80,11 @@ impl Framebuffer {
 
         self.context.framebuffer_texture_2d(
             FramebufferBinding::DRAW_FRAMEBUFFER.into(),
-            attachment_index,
+            match attachment {
+                FramebufferAttachment::Color(index) => gl::COLOR_ATTACHMENT0 + index,
+                FramebufferAttachment::Depth => gl::DEPTH_ATTACHMENT,
+                FramebufferAttachment::DepthStencil => gl::DEPTH_STENCIL_ATTACHMENT,
+            },
             TextureBindTarget::TEXTURE_2D.into(),
             tx,
             0,
@@ -88,31 +96,22 @@ impl Framebuffer {
         self.unbind();
     }
 
-    pub fn set_color_attachment(&mut self, color_attachment: u32, texture: Option<&GlTexture2D>) {
-        self.set_attachment(gl::COLOR_ATTACHMENT0 + color_attachment, texture);
-    }
-
-    pub fn set_color_attachment_renderbuffer(
+    pub fn set_attachment_renderbuffer(
         &mut self,
         attachment: FramebufferAttachment,
         renderbuffer: Option<&Renderbuffer>,
     ) {
-        web_sys::console::log_1(&JsValue::from("Bind FB"));
         self.bind(FramebufferBinding::DRAW_FRAMEBUFFER);
-
         {
             let renderbuffer = if let Some(renderbuffer) = renderbuffer {
-                web_sys::console::log_1(&JsValue::from("Bind RB"));
                 renderbuffer.bind();
                 Some(&renderbuffer.renderbuffer)
             } else {
                 None
             };
-
-            web_sys::console::log_1(&JsValue::from("Set RB attach"));
             self.context.framebuffer_renderbuffer(
                 FramebufferBinding::DRAW_FRAMEBUFFER.into(),
-                match attachment{
+                match attachment {
                     FramebufferAttachment::Color(index) => gl::COLOR_ATTACHMENT0 + index,
                     FramebufferAttachment::Depth => gl::DEPTH_ATTACHMENT,
                     FramebufferAttachment::DepthStencil => gl::DEPTH_STENCIL_ATTACHMENT,
@@ -121,17 +120,7 @@ impl Framebuffer {
                 renderbuffer,
             );
         }
-
-        web_sys::console::log_1(&JsValue::from("Unbind FB"));
         self.unbind();
-    }
-
-    pub fn set_depth_attachment(&mut self, texture: Option<&GlTexture2D>) {
-        self.set_attachment(gl::DEPTH_ATTACHMENT, texture);
-    }
-
-    pub fn set_depth_stencil_attachment(&mut self, texture: Option<&GlTexture2D>) {
-        self.set_attachment(gl::DEPTH_STENCIL_ATTACHMENT, texture);
     }
 
     pub fn blit_framebuffer(

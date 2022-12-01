@@ -14,16 +14,23 @@ pub enum FramebufferError {
     CreateBuffer,
 }
 
-pub struct Framebuffer {
-    context: Rc<gl>,
-    pub framebuffer: WebGlFramebuffer,
-    target: RefCell<Option<FramebufferBinding>>,
-}
-
 #[derive(Clone, Copy)]
 pub struct Viewport {
     pub position: UVec2,
     pub size: UVec2,
+}
+
+#[derive(Clone, Copy)]
+pub enum FramebufferAttachment{
+    Color(u32),
+    Depth,
+    DepthStencil
+}
+
+pub struct Framebuffer {
+    context: Rc<gl>,
+    pub framebuffer: WebGlFramebuffer,
+    target: RefCell<Option<FramebufferBinding>>,
 }
 
 impl Framebuffer {
@@ -87,7 +94,7 @@ impl Framebuffer {
 
     pub fn set_color_attachment_renderbuffer(
         &mut self,
-        color_attachment: u32,
+        attachment: FramebufferAttachment,
         renderbuffer: Option<&Renderbuffer>,
     ) {
         web_sys::console::log_1(&JsValue::from("Bind FB"));
@@ -105,7 +112,11 @@ impl Framebuffer {
             web_sys::console::log_1(&JsValue::from("Set RB attach"));
             self.context.framebuffer_renderbuffer(
                 FramebufferBinding::DRAW_FRAMEBUFFER.into(),
-                gl::COLOR_ATTACHMENT0 + color_attachment,
+                match attachment{
+                    FramebufferAttachment::Color(index) => gl::COLOR_ATTACHMENT0 + index,
+                    FramebufferAttachment::Depth => gl::DEPTH_ATTACHMENT,
+                    FramebufferAttachment::DepthStencil => gl::DEPTH_STENCIL_ATTACHMENT,
+                },
                 gl::RENDERBUFFER,
                 renderbuffer,
             );

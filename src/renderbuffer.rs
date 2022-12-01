@@ -8,6 +8,8 @@ use crate::{limits, Graphics, TextureInternalFormat};
 pub struct Renderbuffer {
     context: Rc<gl>,
     pub renderbuffer: WebGlRenderbuffer,
+    pub size: UVec2, 
+    pub format: TextureInternalFormat
 }
 
 impl Renderbuffer {
@@ -46,6 +48,8 @@ impl Renderbuffer {
         Ok(Self {
             context,
             renderbuffer,
+            size,
+            format
         })
     }
 

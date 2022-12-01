@@ -1,9 +1,11 @@
-use std::{rc::Rc, cell::RefCell};
+use std::{cell::RefCell, rc::Rc};
 
 use glam::UVec2;
 use web_sys::{WebGl2RenderingContext as gl, WebGlFramebuffer};
 mod constants;
-use crate::{FramebufferMaskBits, GlTexture2D, Graphics, MagFilter, TextureBindTarget, Renderbuffer};
+use crate::{
+    FramebufferMaskBits, GlTexture2D, Graphics, MagFilter, Renderbuffer, TextureBindTarget,
+};
 pub use constants::*;
 
 #[derive(Debug, Clone, Copy)]
@@ -39,14 +41,12 @@ impl Framebuffer {
 
     pub fn bind(&self, target: FramebufferBinding) {
         self.unbind();
-        self.context.bind_framebuffer(
-            target.into(),
-            Some(&self.framebuffer),
-        );
+        self.context
+            .bind_framebuffer(target.into(), Some(&self.framebuffer));
         self.target.replace(Some(target));
     }
 
-    pub fn bind_none(context: &gl, target: FramebufferBinding){
+    pub fn bind_none(context: &gl, target: FramebufferBinding) {
         context.bind_framebuffer(target.into(), None);
     }
 
@@ -84,20 +84,28 @@ impl Framebuffer {
         self.set_attachment(gl::COLOR_ATTACHMENT0 + color_attachment, texture);
     }
 
-    pub fn set_color_attachment_renderbuffer(&mut self, color_attachment: u32, renderbuffer: Option<&Renderbuffer>){
+    pub fn set_color_attachment_renderbuffer(
+        &mut self,
+        color_attachment: u32,
+        renderbuffer: Option<&Renderbuffer>,
+    ) {
         self.bind(FramebufferBinding::DRAW_FRAMEBUFFER);
-        let mut rb = None;
-        if let Some(renderbuffer) = renderbuffer {
-            renderbuffer.bind();
-            rb = Some(&renderbuffer.renderbuffer);
-        }
 
-        self.context.framebuffer_renderbuffer(
-            FramebufferBinding::DRAW_FRAMEBUFFER.into(),
-            gl::COLOR_ATTACHMENT0 + color_attachment,
-            gl::RENDERBUFFER,
-            rb,
-        );
+        {
+            let renderbuffer = if let Some(renderbuffer) = renderbuffer {
+                renderbuffer.bind();
+                Some(&renderbuffer.renderbuffer)
+            } else {
+                None
+            };
+
+            self.context.framebuffer_renderbuffer(
+                FramebufferBinding::DRAW_FRAMEBUFFER.into(),
+                gl::COLOR_ATTACHMENT0 + color_attachment,
+                gl::RENDERBUFFER,
+                renderbuffer,
+            );
+        }
 
         if let Some(renderbuffer) = renderbuffer {
             renderbuffer.unbind();
@@ -129,7 +137,7 @@ impl Framebuffer {
             None => Self::bind_none(&graphics.gl_context, FramebufferBinding::READ_FRAMEBUFFER),
         }
 
-        match dst{
+        match dst {
             Some(dst) => dst.bind(FramebufferBinding::DRAW_FRAMEBUFFER),
             None => Self::bind_none(&graphics.gl_context, FramebufferBinding::DRAW_FRAMEBUFFER),
         }

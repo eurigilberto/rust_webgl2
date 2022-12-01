@@ -3,7 +3,7 @@ use std::{rc::Rc, cell::RefCell};
 use glam::UVec2;
 use web_sys::{WebGl2RenderingContext as gl, WebGlFramebuffer};
 mod constants;
-use crate::{FramebufferMaskBits, GlTexture2D, Graphics, MagFilter, TextureBindTarget};
+use crate::{FramebufferMaskBits, GlTexture2D, Graphics, MagFilter, TextureBindTarget, Renderbuffer};
 pub use constants::*;
 
 #[derive(Debug, Clone, Copy)]
@@ -82,6 +82,27 @@ impl Framebuffer {
 
     pub fn set_color_attachment(&mut self, color_attachment: u32, texture: Option<&GlTexture2D>) {
         self.set_attachment(gl::COLOR_ATTACHMENT0 + color_attachment, texture);
+    }
+
+    pub fn set_color_attachment_renderbuffer(&mut self, color_attachment: u32, renderbuffer: Option<&Renderbuffer>){
+        self.bind(FramebufferBinding::DRAW_FRAMEBUFFER);
+        let mut rb = None;
+        if let Some(renderbuffer) = renderbuffer {
+            renderbuffer.bind();
+            rb = Some(&renderbuffer.renderbuffer);
+        }
+
+        self.context.framebuffer_renderbuffer(
+            FramebufferBinding::DRAW_FRAMEBUFFER.into(),
+            gl::COLOR_ATTACHMENT0 + color_attachment,
+            gl::RENDERBUFFER,
+            rb,
+        );
+
+        if let Some(renderbuffer) = renderbuffer {
+            renderbuffer.unbind();
+        }
+        self.unbind();
     }
 
     pub fn set_depth_attachment(&mut self, texture: Option<&GlTexture2D>) {

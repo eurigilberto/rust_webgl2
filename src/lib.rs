@@ -10,6 +10,8 @@ use web_sys::{
     WebGlVertexArrayObject,
 };
 
+mod renderbuffer;
+pub use renderbuffer::*;
 mod shader_program;
 pub use shader_program::*;
 mod limits;
@@ -151,8 +153,8 @@ impl Graphics {
             context.clear(clear_mask);
         }
     }
-    pub fn get_gl_context_clone(&self) -> wgl_context {
-        self.gl_context.as_ref().clone()
+    pub fn get_gl_context_clone(&self) -> Rc<wgl_context> {
+        Rc::clone(&self.gl_context)
     }
     fn _clear_framebuffer(
         context: &wgl_context,

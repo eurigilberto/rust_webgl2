@@ -103,16 +103,16 @@ impl GlTexture2D {
         format: TextureInternalFormat,
         mipmap: Option<u32>
     ) -> Result<Self, GlTextureError> {
-        let gl = graphics.get_gl_context_clone();
-        let texture = match gl.create_texture() {
+        let ctx = graphics.get_gl_context_clone();
+        let texture = match ctx.create_texture() {
             Some(texture) => texture,
             None => return Err(GlTextureError::CreateObject),
         };
 
         //Bind
-        gl.bind_texture(TextureBindTarget::TEXTURE_2D.into(), Some(&texture));
+        ctx.bind_texture(TextureBindTarget::TEXTURE_2D.into(), Some(&texture));
 
-        gl.tex_storage_2d(
+        ctx.tex_storage_2d(
             TextureBindTarget::TEXTURE_2D.into(),
             (1 + mipmap.unwrap_or(0)) as i32,
             format.into(),
@@ -122,12 +122,12 @@ impl GlTexture2D {
         props.set_all_props(graphics);
 
         //Unbind
-        gl.bind_texture(TextureBindTarget::TEXTURE_2D.into(), None);
+        ctx.bind_texture(TextureBindTarget::TEXTURE_2D.into(), None);
 
         Ok(Self {
             props,
             texture,
-            context: graphics.gl_context.clone(),
+            context: ctx,
             format,
             size,
             mipmap

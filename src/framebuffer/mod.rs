@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::{RefCell, Ref}, rc::Rc};
 
 use glam::UVec2;
 use wasm_bindgen::JsValue;
@@ -35,13 +35,13 @@ pub struct FBBindableWrapper{
     pub framebuffer: WebGlFramebuffer,
 }
 
-impl FramebufferBindable for &FBBindableWrapper{
+impl FramebufferBindable for FBBindableWrapper{
     fn bind(&self, graphics: &Graphics, target: FramebufferBinding) {
         graphics.bind_framebuffer(target, Some(&self.framebuffer))
     }
 }
 
-impl FramebufferBindable for &Framebuffer{
+impl FramebufferBindable for Ref<'_, Framebuffer>{
     fn bind(&self, graphics: &Graphics, target: FramebufferBinding) {
         graphics.bind_framebuffer(target, Some(&self.framebuffer))
     }

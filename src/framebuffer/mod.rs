@@ -1,6 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use glam::UVec2;
+use wasm_bindgen::JsValue;
 use web_sys::{WebGl2RenderingContext as gl, WebGlFramebuffer};
 mod constants;
 use crate::{
@@ -89,16 +90,19 @@ impl Framebuffer {
         color_attachment: u32,
         renderbuffer: Option<&Renderbuffer>,
     ) {
+        web_sys::console::log_1(&JsValue::from("Bind FB"));
         self.bind(FramebufferBinding::DRAW_FRAMEBUFFER);
 
         {
             let renderbuffer = if let Some(renderbuffer) = renderbuffer {
+                web_sys::console::log_1(&JsValue::from("Bind RB"));
                 renderbuffer.bind();
                 Some(&renderbuffer.renderbuffer)
             } else {
                 None
             };
 
+            web_sys::console::log_1(&JsValue::from("Set RB attach"));
             self.context.framebuffer_renderbuffer(
                 FramebufferBinding::DRAW_FRAMEBUFFER.into(),
                 gl::COLOR_ATTACHMENT0 + color_attachment,
@@ -108,8 +112,10 @@ impl Framebuffer {
         }
 
         if let Some(renderbuffer) = renderbuffer {
+            web_sys::console::log_1(&JsValue::from("Unbind RB"));
             renderbuffer.unbind();
         }
+        web_sys::console::log_1(&JsValue::from("Unbind FB"));
         self.unbind();
     }
 

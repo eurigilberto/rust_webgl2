@@ -122,12 +122,12 @@ impl Framebuffer {
             );
         }
 
+        web_sys::console::log_1(&JsValue::from("Unbind FB"));
+        self.unbind();
         if let Some(renderbuffer) = renderbuffer {
             web_sys::console::log_1(&JsValue::from("Unbind RB"));
             renderbuffer.unbind();
         }
-        web_sys::console::log_1(&JsValue::from("Unbind FB"));
-        self.unbind();
     }
 
     pub fn set_depth_attachment(&mut self, texture: Option<&GlTexture2D>) {

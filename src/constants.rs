@@ -285,7 +285,7 @@ impl Into<u32> for PrimitiveType{
 }
 
 #[allow(dead_code)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct IndexType(u32);
 #[allow(dead_code)]
 impl IndexType{

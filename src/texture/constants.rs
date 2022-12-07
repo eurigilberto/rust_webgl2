@@ -14,7 +14,7 @@ impl Into<u32> for TextureBindTarget {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub struct MagFilter(u32);
 impl MagFilter {
     pub const LINEAR: MagFilter = MagFilter(gl::LINEAR);
@@ -26,7 +26,7 @@ impl Into<u32> for MagFilter {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub struct MinFilter(u32);
 impl MinFilter {
     pub const LINEAR: MinFilter = MinFilter(gl::LINEAR);
@@ -42,7 +42,7 @@ impl Into<u32> for MinFilter {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub struct TextureWrap(u32);
 impl TextureWrap {
     pub const REPEAT: TextureWrap = TextureWrap(gl::REPEAT);

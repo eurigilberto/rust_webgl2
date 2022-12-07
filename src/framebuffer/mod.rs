@@ -1,7 +1,6 @@
 use std::{cell::{RefCell, Ref}, rc::Rc};
 
 use glam::UVec2;
-use wasm_bindgen::JsValue;
 use web_sys::{WebGl2RenderingContext as gl, WebGlFramebuffer};
 mod constants;
 use crate::{
@@ -95,7 +94,7 @@ impl Framebuffer {
     }
 
     pub fn set_attachment_texture2d(
-        &mut self,
+        &self,
         attachment: FramebufferAttachment,
         texture: Option<&GlTexture2D>,
     ) {
@@ -125,7 +124,7 @@ impl Framebuffer {
     }
 
     pub fn set_attachment_renderbuffer(
-        &mut self,
+        &self,
         attachment: FramebufferAttachment,
         renderbuffer: Option<&Renderbuffer>,
     ) {

@@ -5,7 +5,7 @@ use crate::shader_program::UniformSetter;
 
 ///////////GL-BUFFER
 pub struct GlBuffer {
-    context: Rc<wgl_context>,
+    context: Rc<gl>,
     current_binding: RefCell<Option<BindingPoint>>,
     pub buffer: WebGlBuffer,
     pub binding_point: BindingPoint,
@@ -262,7 +262,7 @@ impl GlUniformBuffer {
 }
 ///////////GL-SHADER
 pub struct GlShader {
-    context: Rc<wgl_context>,
+    context: Rc<gl>,
     pub shader: WebGlShader,
     pub shader_type: ShaderType,
 }
@@ -457,7 +457,7 @@ pub struct AttributeDescription<'a> {
 }
 
 pub struct GlVertexArrayObject {
-    context: Rc<wgl_context>,
+    context: Rc<gl>,
     pub vao: WebGlVertexArrayObject,
 }
 

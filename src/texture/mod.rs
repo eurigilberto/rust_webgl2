@@ -1,8 +1,10 @@
-use std::rc::Rc;
+use std::{borrow::Borrow, cell::Ref, rc::Rc};
 
 use glam::*;
-use wasm_bindgen::JsValue;
 use web_sys::{WebGl2RenderingContext as gl, WebGlTexture};
+
+mod texture2d;
+pub use texture2d::*;
 
 mod constants;
 pub use constants::*;
@@ -47,155 +49,130 @@ pub fn set_min_max_lod(context: &gl, target: TextureBindTarget, min_max_value: (
     context.tex_parameterf(target.into(), gl::TEXTURE_MAX_LOD, min_max_value.1);
 }
 
-#[derive(Clone, Copy)]
-pub struct Texture2DProps {
-    pub wrap_x: TextureWrap,
-    pub wrap_y: TextureWrap,
-    pub mag_filter: MagFilter,
-    pub min_filter: MinFilter,
-    pub base_level: i32,
-    pub max_level: i32,
-    pub min_max_lod: (f32, f32),
+pub enum TextureRef {
+    Texture2D(Rc<GlTexture2D>),
 }
 
-impl Texture2DProps {
-    pub fn set_all_props(&self, context: &Graphics) {
-        let context = &context.get_gl_context_clone();
-        let target = TextureBindTarget::TEXTURE_2D;
-
-        tex_wrap(
-            context,
-            target.into(),
-            TextureWrapSelect::TEXTURE_WRAP_X,
-            self.wrap_x,
-        );
-        tex_wrap(
-            context,
-            target.into(),
-            TextureWrapSelect::TEXTURE_WRAP_Y,
-            self.wrap_y,
-        );
-
-        set_mag_filter(context, target.into(), self.mag_filter);
-        set_min_filter(context, target.into(), self.min_filter);
-
-        set_base_level(context, target.into(), self.base_level);
-        set_max_level(context, target.into(), self.max_level);
-
-        set_min_max_lod(context, target.into(), self.min_max_lod);
-    }
-}
-
-pub struct GlTexture2D {
-    context: Rc<gl>,
-    pub props: Texture2DProps,
-    pub texture: WebGlTexture,
-    pub format: TextureInternalFormat,
-    pub size: UVec2,
-    pub mipmap: Option<u32>
-}
-
-impl GlTexture2D {
-    pub fn new(
-        graphics: &Graphics,
-        props: Texture2DProps,
-        size: UVec2,
-        format: TextureInternalFormat,
-        mipmap: Option<u32>
-    ) -> Result<Self, GlTextureError> {
-        let ctx = graphics.get_gl_context_clone();
-        let texture = match ctx.create_texture() {
-            Some(texture) => texture,
-            None => return Err(GlTextureError::CreateObject),
-        };
-
-        //Bind
-        ctx.bind_texture(TextureBindTarget::TEXTURE_2D.into(), Some(&texture));
-
-        ctx.tex_storage_2d(
-            TextureBindTarget::TEXTURE_2D.into(),
-            (1 + mipmap.unwrap_or(0)) as i32,
-            format.into(),
-            size.x as i32,
-            size.y as i32,
-        );
-        props.set_all_props(graphics);
-
-        //Unbind
-        ctx.bind_texture(TextureBindTarget::TEXTURE_2D.into(), None);
-
-        Ok(Self {
-            props,
-            texture,
-            context: ctx,
-            format,
-            size,
-            mipmap
-        })
-    }
-
+impl TextureRef {
     pub fn bind(&self) {
-        self.context
-            .bind_texture(TextureBindTarget::TEXTURE_2D.into(), Some(&self.texture));
+        match self {
+            TextureRef::Texture2D(texture) => texture.bind(),
+        }
     }
 
-    pub fn unbind(&self) {
-        self.context
-            .bind_texture(TextureBindTarget::TEXTURE_2D.into(), None);
+    pub fn ref_eq(&self, texture: &TextureRef) -> bool {
+        match (self, texture) {
+            (TextureRef::Texture2D(tx1), TextureRef::Texture2D(tx2)) => Rc::ptr_eq(tx1, tx2),
+        }
     }
 
-    pub fn set_texture_data<T: bytemuck::Pod>(
-        &mut self,
-        level: u32,
-        src_data: &[T],
-        src_offset: u32,
-    ) -> Result<(), JsValue> {
-        let internal_format: u32 = self.format.into();
-        let format: TextureFormat = self.format.into();
-        let type_: TextureType = self.format.into();
-        self.context
-            .tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_u8_array_and_src_offset(
-                TextureBindTarget::TEXTURE_2D.into(),
-                level as i32,
-                internal_format as i32,
-                self.size.x as i32,
-                self.size.y as i32,
-                0,
-                format.into(),
-                type_.into(),
-                bytemuck::cast_slice(src_data),
-                src_offset,
-            )
-    }
-
-    pub fn set_sub_texture_data<T: bytemuck::Pod>(
-        &mut self,
-        level: u32,
-        src_data: &[T],
-        src_offset: u32,
-        offset: UVec2,
-    ) -> Result<(), JsValue> {
-        let format: TextureFormat = self.format.into();
-        let type_: TextureType = self.format.into();
-        self.context
-            .tex_sub_image_2d_with_i32_and_i32_and_u32_and_type_and_u8_array_and_src_offset(
-                TextureBindTarget::TEXTURE_2D.into(),
-                level as i32,
-                offset.x as i32,
-                offset.y as i32,
-                self.size.x as i32,
-                self.size.y as i32,
-                format.into(),
-                type_.into(),
-                bytemuck::cast_slice(src_data),
-                src_offset,
-            )
+    pub fn clone(&self)->Self{
+        match self{
+            TextureRef::Texture2D(tx_ref) => {
+                TextureRef::Texture2D(Rc::clone(tx_ref))
+            },
+        }
     }
 }
 
-impl Drop for GlTexture2D{
-    fn drop(&mut self) {
-        self.unbind();
-		self.context.delete_texture(Some(&self.texture))
+pub struct TextureUnits {
+    pub active_textures: [Option<TextureRef>; 16],
+}
+
+impl TextureUnits {
+    pub fn new() -> Self {
+        Self {
+            active_textures: [
+                None, None, None, None, None, None, None, None, None, None, None, None, None, None,
+                None, None,
+            ],
+        }
+    }
+
+    pub fn get_unit_binding_from_texture(&self, texture: TextureRef) -> Option<u32> {
+        for (index, active_texture) in self.active_textures.iter().enumerate() {
+            if active_texture.is_none() {
+                continue;
+            }
+            let active_texture = active_texture.as_ref().unwrap();
+            if TextureRef::ref_eq(active_texture, &texture) {
+                return Some(index as u32);
+            }
+        }
+        None
+    }
+}
+
+pub struct BoundTextureUnitsStatus{
+    pub available_units: Vec<u32>,
+    pub selected_units: Vec<Option<usize>>
+}
+
+impl Graphics {
+    fn get_unit_from_texture(
+        &self,
+        tx_units: Ref<TextureUnits>,
+        tx_ref: &TextureRef,
+    ) -> Option<usize> {
+        for (index, active_texture) in tx_units.active_textures.iter().enumerate() {
+            if active_texture.is_none() {
+                return None;
+            }
+            let tx = active_texture.as_ref().unwrap();
+            if TextureRef::ref_eq(tx, tx_ref) {
+                return Some(index);
+            }
+        }
+        None
+    }
+
+    pub fn generate_already_bound_units(&self, textures: &Vec<TextureRef>)->BoundTextureUnitsStatus{
+        let mut available_units = Vec::new();
+        for i in 0..16 { available_units.push(i); }
+        //-----------------------------------
+        let mut selected_units = vec![None; textures.len()];
+        //Remove bounds textures from available
+        for (index, tx) in textures.iter().enumerate() {
+            let unit_index = self.get_unit_from_texture(self.texture_units.borrow(), tx);
+            selected_units[index] = unit_index;
+            if let Some(u_index) = unit_index{
+                available_units.remove(u_index);
+            }
+        }
+        BoundTextureUnitsStatus{
+            available_units,
+            selected_units,
+        }
+    }
+
+    pub fn bind_missing_textures(&self, textures: &Vec<TextureRef>, mut bound_units: BoundTextureUnitsStatus)->BoundTextureUnitsStatus{
+        for (index, sel_units) in bound_units.selected_units.iter_mut().enumerate(){
+            if sel_units.is_some(){
+                continue;
+            }
+            if bound_units.available_units.len() == 0{
+                panic!("No more available texture units");
+            }
+            let available_unit = bound_units.available_units.remove(0);
+            self.bind_texture_unit(available_unit, textures[index].clone());
+            *sel_units = Some(available_unit as usize);
+        }
+        bound_units
+    }
+
+    pub fn bind_textures_to_units(&self, textures: Vec<TextureRef>) -> Vec<u32> {
+        let bound_units = self.generate_already_bound_units(&textures);
+        let bound_units = self.bind_missing_textures(&textures, bound_units);
+        let selected_units = bound_units.selected_units.iter().map(|unit|unit.unwrap() as u32).collect();
+        selected_units
+    }
+
+    pub fn bind_texture_unit(&self, unit: u32, texture: TextureRef) {
+        if unit >= 16 {
+            panic!("Binding a texture to an out of bounds unit");
+        }
+        self.gl_context.active_texture(gl::TEXTURE0 + unit);
+        texture.bind();
+        self.texture_units.borrow_mut().active_textures[unit as usize] = Some(texture);
     }
 }

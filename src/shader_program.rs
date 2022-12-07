@@ -1,15 +1,76 @@
 use glam::*;
 use std::{collections::HashMap, rc::Rc};
 use wasm_bindgen::JsValue;
-use web_sys::{WebGlProgram, WebGlUniformLocation};
-use webgl2_shader_definition::ShaderUniform;
+use web_sys::{WebGlProgram, WebGlUniformLocation, WebGlShader};
+use webgl2_shader_definition::{ShaderUniform, ShaderSource, generate_shader_str_from_single_source};
 
-use crate::{GlShader, GlUniform, Graphics, IndexType, PrimitiveType};
+use crate::{GlShader, GlUniform, Graphics, IndexType, PrimitiveType, ShaderType, ProgramParamerter};
 use web_sys::WebGl2RenderingContext as wgl_context;
 
 impl Drop for GlProgram {
     fn drop(&mut self) {
         self.context.delete_program(Some(&self.program));
+    }
+}
+
+impl Graphics {
+    pub fn create_shader_from_str(
+        &self,
+        shader: &str,
+        shader_type: ShaderType,
+    ) -> Result<WebGlShader, JsValue> {
+        let gl_shader = self.gl_context.create_shader(shader_type.into()).unwrap();
+        self.gl_context.shader_source(&gl_shader, shader);
+        self.gl_context.compile_shader(&gl_shader);
+        let compilation_status = self
+            .gl_context
+            .get_shader_parameter(&gl_shader, wgl_context::COMPILE_STATUS);
+        if !compilation_status
+            .as_bool()
+            .expect("Compilation status has to be bool")
+        {
+            //self.gl_context.draw_elements_with_f64(mode, count, type_, offset)
+            match self.gl_context.get_shader_info_log(&gl_shader) {
+                Some(shader_log) => Err(JsValue::from(shader_log + "/n " + shader)),
+                None => Err(JsValue::from("Shader compilation failed")),
+            }
+        } else {
+            Ok(gl_shader)
+        }
+    }
+
+    pub fn create_gl_program(
+        &self,
+        vertex_shader: &WebGlShader,
+        fragment_shader: &WebGlShader,
+    ) -> Result<WebGlProgram, JsValue> {
+        match self.gl_context.create_program() {
+            Some(shader_program) => {
+                self.gl_context
+                    .attach_shader(&shader_program, vertex_shader);
+                self.gl_context
+                    .attach_shader(&shader_program, fragment_shader);
+                self.gl_context.link_program(&shader_program);
+
+                let link_param = self
+                    .gl_context
+                    .get_program_parameter(&shader_program, ProgramParamerter::LINK_STATUS.into());
+
+                if link_param.as_bool().unwrap() {
+                    self.gl_context
+                        .detach_shader(&shader_program, vertex_shader);
+                    self.gl_context
+                        .detach_shader(&shader_program, fragment_shader);
+                    Ok(shader_program)
+                } else {
+                    match self.gl_context.get_program_info_log(&shader_program) {
+                        Some(info_log) => Err(JsValue::from(info_log)),
+                        None => Err(JsValue::from("Program link status false")),
+                    }
+                }
+            }
+            None => Err(JsValue::from("Could not create webgl program")),
+        }
     }
 }
 
@@ -96,6 +157,49 @@ impl GlProgram {
             }
         }
         Ok(())
+    }
+}
+
+#[derive(Debug)]
+pub enum ProgramCreationError {
+    SourceParsing,
+    VertexShader(JsValue),
+    FragmentShader(JsValue),
+    ShaderGeneration { vertex: JsValue, fragment: JsValue },
+    Program(JsValue),
+}
+pub fn create_program_from_single_shader_source(
+    graphics: &Graphics,
+    source: &ShaderSource,
+) -> Result<GlProgram, ProgramCreationError> {
+    match generate_shader_str_from_single_source(source) {
+        Ok((vs_shader, fs_shader)) => {
+            /*web_sys::console::log_1(&JsValue::from(format!(
+                "Vertex shader: {:?}
+            Fragment shader: {:?}",
+                vs_shader, fs_shader
+            )));*/
+            match (
+                GlShader::new(graphics, &vs_shader, ShaderType::VERTEX_SHADER),
+                GlShader::new(graphics, &fs_shader, ShaderType::FRAGMENT_SHADER),
+            ) {
+                (Err(vertex_error), Err(fragment_error)) => {
+                    Err(ProgramCreationError::ShaderGeneration {
+                        vertex: vertex_error,
+                        fragment: fragment_error,
+                    })
+                }
+                (Ok(_), Err(frag_error)) => Err(ProgramCreationError::FragmentShader(frag_error)),
+                (Err(vert_error), Ok(_)) => Err(ProgramCreationError::VertexShader(vert_error)),
+                (Ok(vert_shader), Ok(frag_shader)) => {
+                    match GlProgram::new(graphics, &vert_shader, &frag_shader) {
+                        Ok(program) => Ok(program),
+                        Err(error) => Err(ProgramCreationError::Program(error)),
+                    }
+                }
+            }
+        }
+        Err(_) => Err(ProgramCreationError::SourceParsing),
     }
 }
 

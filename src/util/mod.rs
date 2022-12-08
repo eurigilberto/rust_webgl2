@@ -1,6 +1,6 @@
 use color::{RGBA, RGB};
 use glam::*;
-use crate::{GlUniform, FloatUniform, UIntUniform};
+use crate::{GlUniform, FloatUniform, UIntUniform, IntUniform};
 
 pub trait IntoGlUniform{
 	fn uniform(&self)->GlUniform;
@@ -15,6 +15,12 @@ impl IntoGlUniform for f32{
 impl IntoGlUniform for u32{
     fn uniform(&self)->GlUniform {
         UIntUniform::Scalar(*self).into()
+    }
+}
+
+impl IntoGlUniform for i32{
+    fn uniform(&self)->GlUniform {
+        IntUniform::Scalar(*self).into()
     }
 }
 

@@ -6,7 +6,7 @@ use web_sys::{WebGl2RenderingContext as gl, WebGlTexture};
 use crate::{
     set_base_level, set_mag_filter, set_max_level, set_min_filter, set_min_max_lod, tex_wrap,
     Graphics, MagFilter, MinFilter, TextureBindTarget, TextureFormat, TextureType, TextureWrap,
-    TextureWrapSelect, TextureInternalFormat, GlTextureError,
+    TextureWrapSelect, TextureInternalFormat,
 };
 
 #[derive(Clone, Copy)]
@@ -64,11 +64,11 @@ impl GlTexture2D {
         size: UVec2,
         format: TextureInternalFormat,
         mipmap: Option<u32>,
-    ) -> Result<Self, GlTextureError> {
+    ) -> Result<Self, ()> {
         let ctx = graphics.get_gl_context_clone();
         let texture = match ctx.create_texture() {
             Some(texture) => texture,
-            None => return Err(GlTextureError::CreateObject),
+            None => return Err(()),
         };
 
         //Bind

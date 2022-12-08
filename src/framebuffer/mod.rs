@@ -8,11 +8,6 @@ use crate::{
 };
 pub use constants::*;
 
-#[derive(Debug, Clone, Copy)]
-pub enum FramebufferError {
-    CreateBuffer,
-}
-
 #[derive(Clone, Copy)]
 pub struct Viewport {
     pub position: UVec2,
@@ -53,10 +48,10 @@ pub struct Framebuffer {
 }
 
 impl Framebuffer {
-    pub fn new(graphics: &Graphics) -> Result<Self, FramebufferError> {
+    pub fn new(graphics: &Graphics) -> Result<Self, ()> {
         let framebuffer = match graphics.gl_context.create_framebuffer() {
             Some(framebuffer) => framebuffer,
-            None => return Err(FramebufferError::CreateBuffer),
+            None => return Err(()),
         };
 
         Ok(Self {

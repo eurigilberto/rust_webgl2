@@ -7,7 +7,7 @@ use glam::*;
 use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext as gl};
 use web_sys::{
-    WebGlBuffer, WebGlFramebuffer, WebGlProgram, WebGlShader, WebGlUniformLocation,
+    WebGlBuffer, WebGlFramebuffer, WebGlShader, WebGlUniformLocation,
     WebGlVertexArrayObject,
 };
 

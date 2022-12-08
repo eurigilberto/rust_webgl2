@@ -66,11 +66,9 @@ impl TextureRef {
         }
     }
 
-    pub fn clone(&self)->Self{
-        match self{
-            TextureRef::Texture2D(tx_ref) => {
-                TextureRef::Texture2D(Rc::clone(tx_ref))
-            },
+    pub fn clone(&self) -> Self {
+        match self {
+            TextureRef::Texture2D(tx_ref) => TextureRef::Texture2D(Rc::clone(tx_ref)),
         }
     }
 }
@@ -89,85 +87,86 @@ impl TextureUnits {
         }
     }
 
-    pub fn get_unit_binding_from_texture(&self, texture: TextureRef) -> Option<u32> {
+    pub fn get_unit_binding_from_texture(&self, texture: &TextureRef) -> Option<usize> {
         for (index, active_texture) in self.active_textures.iter().enumerate() {
             if active_texture.is_none() {
                 continue;
             }
             let active_texture = active_texture.as_ref().unwrap();
             if TextureRef::ref_eq(active_texture, &texture) {
-                return Some(index as u32);
-            }
-        }
-        None
-    }
-}
-
-pub struct BoundTextureUnitsStatus{
-    pub available_units: Vec<u32>,
-    pub selected_units: Vec<Option<usize>>
-}
-
-impl Graphics {
-    fn get_unit_from_texture(
-        &self,
-        tx_units: Ref<TextureUnits>,
-        tx_ref: &TextureRef,
-    ) -> Option<usize> {
-        for (index, active_texture) in tx_units.active_textures.iter().enumerate() {
-            if active_texture.is_none() {
-                return None;
-            }
-            let tx = active_texture.as_ref().unwrap();
-            if TextureRef::ref_eq(tx, tx_ref) {
                 return Some(index);
             }
         }
         None
     }
 
-    pub fn generate_already_bound_units(&self, textures: &Vec<TextureRef>)->BoundTextureUnitsStatus{
-        let mut available_units = Vec::new();
-        for i in 0..16 { available_units.push(i); }
-        //-----------------------------------
-        let mut selected_units = vec![None; textures.len()];
+    pub fn generate_already_bound_units(
+        &self,
+        textures: &Vec<TextureRef>,
+    ) -> BoundTextureUnitsStatus {
+        let mut available_units: Vec<u32> = (0..16).map(|unit| unit).collect();
+        let mut bound_units = Vec::new();
+        let mut missing_bindins = Vec::new();
         //Remove bounds textures from available
-        for (index, tx) in textures.iter().enumerate() {
-            let unit_index = self.get_unit_from_texture(self.texture_units.borrow(), tx);
-            selected_units[index] = unit_index;
-            if let Some(u_index) = unit_index{
+        for (texture_index, tx) in textures.iter().enumerate() {
+            let unit_index = self.get_unit_binding_from_texture(tx);
+            if let Some(u_index) = unit_index {
                 available_units.remove(u_index);
+                bound_units.push(TextureBindData {
+                    texture_index,
+                    texture_unit: u_index,
+                })
+            } else {
+                missing_bindins.push(texture_index);
             }
         }
-        BoundTextureUnitsStatus{
-            available_units,
-            selected_units,
-        }
-    }
 
-    pub fn bind_missing_textures(&self, textures: &Vec<TextureRef>, mut bound_units: BoundTextureUnitsStatus)->BoundTextureUnitsStatus{
-        for (index, sel_units) in bound_units.selected_units.iter_mut().enumerate(){
-            if sel_units.is_some(){
-                continue;
-            }
-            if bound_units.available_units.len() == 0{
+        BoundTextureUnitsStatus {
+            available_units,
+            bound_units,
+            missing_bindins,
+        }
+    } 
+}
+
+pub struct BoundTextureUnitsStatus {
+    pub available_units: Vec<u32>,
+    pub bound_units: Vec<TextureBindData>,
+    pub missing_bindins: Vec<usize>,
+}
+
+pub struct TextureBindData {
+    pub texture_index: usize,
+    pub texture_unit: usize,
+}
+
+impl Graphics {
+    pub fn bind_missing_textures(
+        &self,
+        textures: &Vec<TextureRef>,
+        mut bound_units: BoundTextureUnitsStatus,
+    ) -> BoundTextureUnitsStatus {
+        for texture_index in bound_units.missing_bindins.iter() {
+            if bound_units.available_units.len() == 0 {
                 panic!("No more available texture units");
             }
             let available_unit = bound_units.available_units.remove(0);
-            self.bind_texture_unit(available_unit, textures[index].clone());
-            *sel_units = Some(available_unit as usize);
+            self.bind_texture_to_unit(available_unit, textures[*texture_index].clone());
+            bound_units.bound_units.push(TextureBindData {
+                texture_index: *texture_index,
+                texture_unit: available_unit as usize,
+            });
         }
         bound_units
     }
 
-    pub fn bind_textures_to_units(&self, textures: Vec<TextureRef>) -> Vec<u32> {
-        let bound_units = self.generate_already_bound_units(&textures);
+    pub fn bind_textures_to_units(&self, textures: Vec<TextureRef>) -> Vec<TextureBindData> {
+        let bound_units = self.texture_units.borrow().generate_already_bound_units(&textures);
         let bound_units = self.bind_missing_textures(&textures, bound_units);
-        let selected_units = bound_units.selected_units.iter().map(|unit|unit.unwrap() as u32).collect();
-        selected_units
+        bound_units.bound_units
     }
 
-    pub fn bind_texture_unit(&self, unit: u32, texture: TextureRef) {
+    pub fn bind_texture_to_unit(&self, unit: u32, texture: TextureRef) {
         if unit >= 16 {
             panic!("Binding a texture to an out of bounds unit");
         }

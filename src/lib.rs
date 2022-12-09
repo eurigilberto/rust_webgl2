@@ -7,8 +7,7 @@ use glam::*;
 use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::{HtmlCanvasElement, WebGl2RenderingContext as gl};
 use web_sys::{
-    WebGlBuffer, WebGlFramebuffer, WebGlShader, WebGlUniformLocation,
-    WebGlVertexArrayObject,
+    WebGlBuffer, WebGlFramebuffer, WebGlShader, WebGlUniformLocation, WebGlVertexArrayObject,
 };
 
 mod renderbuffer;
@@ -90,13 +89,8 @@ pub struct Graphics {
     texture_units: RefCell<TextureUnits>,
 }
 
-
-
 impl Graphics {
-    pub fn new(
-        render_context: gl,
-        canvas: web_sys::HtmlCanvasElement,
-    ) -> Result<Self, ()> {
+    pub fn new(render_context: gl, canvas: web_sys::HtmlCanvasElement) -> Result<Self, ()> {
         Ok(Self {
             canvas,
             gl_context: Rc::new(render_context),
@@ -181,36 +175,48 @@ impl Graphics {
 
 impl From<WebGLDataType> for GlUniform {
     fn from(uniform: WebGLDataType) -> Self {
+        use WebGLDataType as Type;
         match uniform {
-            WebGLDataType::Void => panic!("Cannot transform void"),
+            Type::Void => panic!("Cannot transform void"),
 
-            WebGLDataType::Float => GlUniform::Float(FloatUniform::Scalar(0.0)),
-            WebGLDataType::Vec2 => GlUniform::Float(FloatUniform::Vec2(Vec2::ZERO)),
-            WebGLDataType::Vec3 => GlUniform::Float(FloatUniform::Vec3(Vec3::ZERO)),
-            WebGLDataType::Vec4 => GlUniform::Float(FloatUniform::Vec4(Vec4::ZERO)),
-            WebGLDataType::Mat2 => GlUniform::Float(FloatUniform::Mat2(Mat2::IDENTITY)),
-            WebGLDataType::Mat3 => GlUniform::Float(FloatUniform::Mat3(Mat3::IDENTITY)),
-            WebGLDataType::Mat4 => GlUniform::Float(FloatUniform::Mat4(Mat4::IDENTITY)),
-
-            WebGLDataType::Bool => todo!("I am not sure if boolean are useful"),
-            WebGLDataType::BVec2 => todo!("I am not sure if boolean are useful"),
-            WebGLDataType::BVec3 => todo!("I am not sure if boolean are useful"),
-            WebGLDataType::BVec4 => todo!("I am not sure if boolean are useful"),
-
-            WebGLDataType::Int => GlUniform::Int(IntUniform::Scalar(0)),
-            WebGLDataType::IVec2 => GlUniform::Int(IntUniform::Vec2(IVec2::ZERO)),
-            WebGLDataType::IVec3 => GlUniform::Int(IntUniform::Vec3(IVec3::ZERO)),
-            WebGLDataType::IVec4 => GlUniform::Int(IntUniform::Vec4(IVec4::ZERO)),
-
-            WebGLDataType::Uint => GlUniform::UInt(UIntUniform::Scalar(0)),
-            WebGLDataType::UVec2 => GlUniform::UInt(UIntUniform::Vec2(UVec2::ZERO)),
-            WebGLDataType::UVec3 => GlUniform::UInt(UIntUniform::Vec3(UVec3::ZERO)),
-            WebGLDataType::UVec4 => GlUniform::UInt(UIntUniform::Vec4(UVec4::ZERO)),
+            Type::Float => GlUniform::Float(FloatUniform::Scalar(0.0)),
+            Type::Vec2 => GlUniform::Float(FloatUniform::Vec2(Vec2::ZERO)),
+            Type::Vec3 => GlUniform::Float(FloatUniform::Vec3(Vec3::ZERO)),
+            Type::Vec4 => GlUniform::Float(FloatUniform::Vec4(Vec4::ZERO)),
+            Type::Mat2 => GlUniform::Float(FloatUniform::Mat2(Mat2::IDENTITY)),
+            Type::Mat3 => GlUniform::Float(FloatUniform::Mat3(Mat3::IDENTITY)),
+            Type::Mat4 => GlUniform::Float(FloatUniform::Mat4(Mat4::IDENTITY)),
+            Type::Bool => todo!("I am not sure if boolean are useful"),
+            Type::BVec2 => todo!("I am not sure if boolean are useful"),
+            Type::BVec3 => todo!("I am not sure if boolean are useful"),
+            Type::BVec4 => todo!("I am not sure if boolean are useful"),
+            Type::Int => GlUniform::Int(IntUniform::Scalar(0)),
+            Type::IVec2 => GlUniform::Int(IntUniform::Vec2(IVec2::ZERO)),
+            Type::IVec3 => GlUniform::Int(IntUniform::Vec3(IVec3::ZERO)),
+            Type::IVec4 => GlUniform::Int(IntUniform::Vec4(IVec4::ZERO)),
+            Type::Uint => GlUniform::UInt(UIntUniform::Scalar(0)),
+            Type::UVec2 => GlUniform::UInt(UIntUniform::Vec2(UVec2::ZERO)),
+            Type::UVec3 => GlUniform::UInt(UIntUniform::Vec3(UVec3::ZERO)),
+            Type::UVec4 => GlUniform::UInt(UIntUniform::Vec4(UVec4::ZERO)),
+            Type::Sampler2D
+            | Type::Sampler3D
+            | Type::SamplerCube
+            | Type::SamplerCubeShadow
+            | Type::Sampler2DShadow
+            | Type::Sampler2DArray
+            | Type::Sampler2DArrayShadow
+            | Type::ISampler2D
+            | Type::ISampler3D
+            | Type::ISamplerCube
+            | Type::ISampler2DArray
+            | Type::USampler2D
+            | Type::USampler3D
+            | Type::USamplerCube
+            | Type::USampler2DArray => GlUniform::Int(IntUniform::Scalar(0)),
         }
     }
 }
 //Shader object creation
-
 
 //Redefinition of gl function signatures
 impl Graphics {

@@ -41,6 +41,12 @@ impl FramebufferBindable for Ref<'_, Framebuffer>{
     }
 }
 
+impl FramebufferBindable for &Framebuffer{
+    fn bind(&self, graphics: &Graphics, target: FramebufferBinding) {
+        graphics.bind_framebuffer(target, Some(&self.framebuffer))
+    }
+}
+
 pub struct Framebuffer {
     context: Rc<gl>,
     pub framebuffer: WebGlFramebuffer,

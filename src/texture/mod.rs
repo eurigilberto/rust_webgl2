@@ -1,7 +1,7 @@
-use std::{borrow::Borrow, cell::Ref, rc::Rc};
+use std::{rc::Rc};
 
 use glam::*;
-use web_sys::{WebGl2RenderingContext as gl, WebGlTexture};
+use web_sys::{WebGl2RenderingContext as gl};
 
 mod texture2d;
 pub use texture2d::*;

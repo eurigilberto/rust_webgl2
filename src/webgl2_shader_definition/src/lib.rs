@@ -30,6 +30,24 @@ pub enum WebGLDataType {
     Mat2,
     Mat3,
     Mat4,
+
+    Sampler2D,
+    Sampler3D,
+    SamplerCube,
+    SamplerCubeShadow,
+    Sampler2DShadow,
+    Sampler2DArray,
+    Sampler2DArrayShadow,
+
+    ISampler2D,
+    ISampler3D,
+    ISamplerCube,
+    ISampler2DArray,
+
+    USampler2D,
+    USampler3D,
+    USamplerCube,
+    USampler2DArray,
 }
 
 // source: https://www.khronos.org/files/webgl20-reference-guide.pdf
@@ -75,6 +93,25 @@ impl WebGLDataType {
             WebGLDataType::Mat2 => "mat2",
             WebGLDataType::Mat3 => "mat3",
             WebGLDataType::Mat4 => "mat4",
+            
+            WebGLDataType::Sampler2D => "sampler2D",
+            WebGLDataType::Sampler3D => "sampler3D",
+            WebGLDataType::SamplerCube => "samplerCube",
+            WebGLDataType::SamplerCubeShadow => "samplerCubeShadow",
+            WebGLDataType::Sampler2DShadow => "sampler2DShadow",
+            WebGLDataType::Sampler2DArray => "sampler2DArray",
+            WebGLDataType::Sampler2DArrayShadow => "sampler2DArrayShadow",
+            
+            WebGLDataType::ISampler2D => "isampler2D",
+            WebGLDataType::ISampler3D => "isampler3D",
+            WebGLDataType::ISamplerCube => "isamplerCube",
+            WebGLDataType::ISampler2DArray => "isampler2DArray",
+            
+            WebGLDataType::USampler2D => "usampler2D",
+            WebGLDataType::USampler3D => "usampler3D",
+            WebGLDataType::USamplerCube => "usamplerCube",
+            WebGLDataType::USampler2DArray => "usampler2DArray",
+            
         }
     }
 }

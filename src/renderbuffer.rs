@@ -36,13 +36,22 @@ impl Renderbuffer {
         };
 
         context.bind_renderbuffer(gl::RENDERBUFFER, Some(&renderbuffer));
-        context.renderbuffer_storage_multisample(
-            gl::RENDERBUFFER,
-            samples,
-            format.into(),
-            size.x as i32,
-            size.y as i32,
-        );
+        if samples == 0 {
+            panic!("Cannot create render buffer with 0 samples")
+        }else if samples == 1{
+            context.renderbuffer_storage(gl::RENDERBUFFER,
+                format.into(),
+                size.x as i32,
+                size.y as i32,)
+        }else{
+            context.renderbuffer_storage_multisample(
+                gl::RENDERBUFFER,
+                samples,
+                format.into(),
+                size.x as i32,
+                size.y as i32,
+            );
+        }
         context.bind_renderbuffer(gl::RENDERBUFFER, None);
 
         Ok(Self {

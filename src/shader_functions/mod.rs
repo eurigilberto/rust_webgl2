@@ -59,9 +59,9 @@ pub mod gerstner_waves {
 
     pub const NAME: &str = "gerstner_waves";
     pub const PARAMS: &str =
-        "vec3 position, vec2 wave_axis, float wavelength, float time, float steepness";
+        "vec2 position, vec2 wave_axis, float wavelength, float time, float steepness";
     pub const FN: &str = r#"
-float w_pos = dot(position, vec3(wave_axis.x, 0.0, wave_axis.y));
+float w_pos = dot(position, wave_axis);
 float k = 2.0 * 3.1416 / wavelength;
 float f = k * (w_pos - time);
 float a = steepness / k;

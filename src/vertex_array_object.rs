@@ -102,7 +102,7 @@ impl GlVertexArrayObject {
     pub fn new(
         graphics: &Graphics,
         attribute_descriptors: Vec<AttributeDescription>,
-        buffers: &[&Rc<GlBuffer>],
+        buffers: &[Rc<GlBuffer>],
         index_buffer: Option<Rc<GlIndexBuffer>>,
     ) -> Result<Self, JsValue> {
         match graphics.gl_context.create_vertex_array() {

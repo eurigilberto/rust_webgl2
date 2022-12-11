@@ -5,11 +5,6 @@ use std::rc::Rc;
 use web_sys::WebGl2RenderingContext as wgl_context;
 use webgl2_shader_definition::ShaderSource;
 
-/// A material is going to have some implicit lifetime entanglement with the buffers
-/// bound in the vertex array object. Having said so, the buffers could be removed from the VAO
-/// and others coudl be bound instead, so it is not a hard coupling.
-///
-/// Uniforms definitions are still missing form the material
 #[allow(dead_code)]
 pub struct GlMaterial {
     context: Rc<wgl_context>,

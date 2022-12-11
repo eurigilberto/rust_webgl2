@@ -30,7 +30,8 @@ mod draw_capabilities;
 pub use draw_capabilities::*;
 mod texture;
 pub use texture::*;
-
+mod vertex_array_object;
+pub use vertex_array_object::*;
 mod framebuffer;
 pub use framebuffer::*;
 mod util;

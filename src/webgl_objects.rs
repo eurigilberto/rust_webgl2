@@ -99,7 +99,8 @@ impl GlBuffer {
 
     pub fn bind_to(&self, bind_point: BindingPoint) {
         self.current_binding.replace(Some(bind_point));
-        self.context.bind_buffer(bind_point.into(), Some(&self.buffer));
+        self.context
+            .bind_buffer(bind_point.into(), Some(&self.buffer));
     }
 
     pub fn bind(&self) {
@@ -435,138 +436,5 @@ impl GlUniform {
                 return false;
             }
         }
-    }
-}
-
-///////////VERTEX-ATTRIBUTE-OBJECT
-#[derive(Debug)]
-pub struct InterleavedOffset {
-    pub stride: u8,
-    pub offset: u8,
-}
-
-pub struct AttributeDescription<'a> {
-    pub location: u32,
-    pub unit_type: NumberType,
-    pub size: AttributeSize,
-    pub buffer: &'a GlBuffer,
-    pub normalize: bool,
-    //Required for Interleaved attributes
-    pub interleaved_offset: Option<InterleavedOffset>,
-    pub per_instance_divisor: Option<u32>,
-}
-
-pub struct GlVertexArrayObject {
-    context: Rc<gl>,
-    pub vao: WebGlVertexArrayObject,
-}
-
-impl GlVertexArrayObject {
-    pub fn new(
-        graphics: &Graphics,
-        attribute_descriptors: Vec<AttributeDescription>,
-        index_buffer: Option<&GlIndexBuffer>,
-    ) -> Result<Self, JsValue> {
-        match graphics.gl_context.create_vertex_array() {
-            Some(vertex_array) => {
-                let mut bound_points = std::collections::HashSet::new();
-                graphics.gl_context.bind_vertex_array(Some(&vertex_array));
-                for attribute in attribute_descriptors {
-                    let buffer = attribute.buffer;
-                    buffer.bind();
-
-                    graphics
-                        .gl_context
-                        .enable_vertex_attrib_array(attribute.location);
-
-                    let mut stride = 0;
-                    let mut offset = 0;
-                    if let Some(interleaved) = attribute.interleaved_offset {
-                        stride = interleaved.stride as i32;
-                        offset = interleaved.offset as i32;
-                    }
-
-                    if let Some(divisor) = attribute.per_instance_divisor {
-                        if stride == 0 && divisor != 0 {
-                            return Err(JsValue::from(
-                                "The attribute is instanced but the stride was set to 0",
-                            ));
-                        }
-                    }
-
-                    if attribute.unit_type.is_integer_type() && !attribute.normalize {
-                        graphics.gl_context.vertex_attrib_i_pointer_with_i32(
-                            attribute.location,
-                            attribute.size.into(),
-                            attribute.unit_type.into(),
-                            stride,
-                            offset,
-                        );
-                    } else {
-                        graphics.gl_context.vertex_attrib_pointer_with_i32(
-                            attribute.location,
-                            attribute.size.into(),
-                            attribute.unit_type.into(),
-                            attribute.normalize,
-                            stride,
-                            offset,
-                        );
-                    }
-
-                    if let Some(divisor) = attribute.per_instance_divisor {
-                        graphics
-                            .gl_context
-                            .vertex_attrib_divisor(attribute.location, divisor)
-                    }
-
-                    bound_points.insert(buffer.binding_point);
-                }
-
-                if let Some(index_buffer) = index_buffer {
-                    if index_buffer.binding_point == BindingPoint::INDEX_BUFFER {
-                        index_buffer.bind();
-
-                        bound_points.insert(index_buffer.binding_point);
-                    } else {
-                        return Err(JsValue::from(
-                            "Index buffer set but the index does not point to an Index buffer",
-                        ));
-                    }
-                }
-
-                graphics.gl_context.bind_vertex_array(None);
-                for bp in bound_points.drain() {
-                    graphics.gl_context.bind_buffer(bp.into(), None);
-                }
-
-                Ok(Self {
-                    context: graphics.gl_context.clone(),
-                    vao: vertex_array,
-                })
-            }
-            None => Err(JsValue::from("Could not create vertex array object")),
-        }
-    }
-
-    pub fn bind(&self) {
-        self.context.bind_vertex_array(Some(&self.vao));
-    }
-
-    pub fn unbind(&self) {
-        self.context.bind_vertex_array(None);
-    }
-}
-
-impl Drop for GlVertexArrayObject {
-    fn drop(&mut self) {
-        self.context.delete_vertex_array(Some(&self.vao));
-    }
-}
-
-impl Deref for GlVertexArrayObject {
-    type Target = WebGlVertexArrayObject;
-
-    fn deref(&self) -> &Self::Target {
-        &self.vao
     }
 }

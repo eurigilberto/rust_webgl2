@@ -1,5 +1,5 @@
 use super::*;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 use wasm_bindgen::JsValue;
 
 use crate::{AttributeSize, BindingPoint, GlBuffer, GlIndexBuffer, Graphics, NumberType};
@@ -42,11 +42,11 @@ pub struct GlVertexArrayObject {
 }
 
 impl GlVertexArrayObject {
-	/// Sets the vertex atribute pointer
-	/// it is set to the currently bound ArrayBuffer
-	/// with the provided attribute description.
-	/// This properly selects the webgl2 attrib pointer function to use
-	/// depending on the value type and the normalization property
+    /// Sets the vertex atribute pointer
+    /// it is set to the currently bound ArrayBuffer
+    /// with the provided attribute description.
+    /// This properly selects the webgl2 attrib pointer function to use
+    /// depending on the value type and the normalization property
     fn vertex_attrib_pointer(graphics: &Graphics, attribute: &AttributeDescription) {
         let (stride, offset) = attribute.get_stride_and_offset();
         if attribute.unit_type.is_integer_type() && !attribute.normalize {
@@ -67,6 +67,23 @@ impl GlVertexArrayObject {
                 offset as i32,
             );
         }
+    }
+
+    fn get_index_buffer(&self) -> Option<Weak<GlIndexBuffer>> {
+        let index_buffer = self.index_buffer.borrow();
+        match index_buffer.as_ref() {
+            Some(index_buffer) => return Some(Rc::downgrade(index_buffer)),
+            None => None,
+        }
+    }
+
+    fn get_array_buffers(&self) -> Vec<Weak<GlBuffer>> {
+        let vertex_buffer = self.buffers.borrow();
+        let mut buffers = Vec::new();
+        for buffer in vertex_buffer.iter() {
+            buffers.push(Rc::downgrade(buffer));
+        }
+        buffers
     }
 
     fn enable_vertex_attrib(graphics: &Graphics, attribute: &AttributeDescription) {
@@ -171,8 +188,8 @@ impl GlVertexArrayObject {
         match index_buffer {
             Some(index_buffer) => index_buffer.bind(),
             None => {
-				graphics.bind_buffer(BindingPoint::INDEX_BUFFER, None);
-			}
+                graphics.bind_buffer(BindingPoint::INDEX_BUFFER, None);
+            }
         }
         self.unbind();
     }

@@ -69,7 +69,7 @@ impl GlVertexArrayObject {
         }
     }
 
-    fn get_index_buffer(&self) -> Option<Weak<GlIndexBuffer>> {
+    pub fn get_index_buffer(&self) -> Option<Weak<GlIndexBuffer>> {
         let index_buffer = self.index_buffer.borrow();
         match index_buffer.as_ref() {
             Some(index_buffer) => return Some(Rc::downgrade(index_buffer)),
@@ -77,7 +77,7 @@ impl GlVertexArrayObject {
         }
     }
 
-    fn get_array_buffers(&self) -> Vec<Weak<GlBuffer>> {
+    pub fn get_array_buffers(&self) -> Vec<Weak<GlBuffer>> {
         let vertex_buffer = self.buffers.borrow();
         let mut buffers = Vec::new();
         for buffer in vertex_buffer.iter() {

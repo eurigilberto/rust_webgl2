@@ -93,7 +93,7 @@ impl WebGLDataType {
             WebGLDataType::Mat2 => "mat2",
             WebGLDataType::Mat3 => "mat3",
             WebGLDataType::Mat4 => "mat4",
-            
+
             WebGLDataType::Sampler2D => "sampler2D",
             WebGLDataType::Sampler3D => "sampler3D",
             WebGLDataType::SamplerCube => "samplerCube",
@@ -101,17 +101,16 @@ impl WebGLDataType {
             WebGLDataType::Sampler2DShadow => "sampler2DShadow",
             WebGLDataType::Sampler2DArray => "sampler2DArray",
             WebGLDataType::Sampler2DArrayShadow => "sampler2DArrayShadow",
-            
+
             WebGLDataType::ISampler2D => "isampler2D",
             WebGLDataType::ISampler3D => "isampler3D",
             WebGLDataType::ISamplerCube => "isamplerCube",
             WebGLDataType::ISampler2DArray => "isampler2DArray",
-            
+
             WebGLDataType::USampler2D => "usampler2D",
             WebGLDataType::USampler3D => "usampler3D",
             WebGLDataType::USamplerCube => "usamplerCube",
             WebGLDataType::USampler2DArray => "usampler2DArray",
-            
         }
     }
 }
@@ -123,8 +122,8 @@ pub struct ShaderAttribute {
     pub name: String,
 }
 
-impl ShaderAttribute{
-    pub fn get_default_frag_attribute()->Self{
+impl ShaderAttribute {
+    pub fn get_default_frag_attribute() -> Self {
         Self {
             layout_loc: 0,
             kind: WebGLDataType::Vec4,
@@ -220,6 +219,7 @@ pub struct FunctionDefinition {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ShaderUniform {
+    pub array_length: Option<u32>,
     pub kind: WebGLDataType,
     pub name: String,
 }
@@ -326,7 +326,20 @@ fn push_uniform_collection(shader_code: &mut String, u_collection: &UniformColle
     }
 
     for uniform in &u_collection.uniforms {
-        let uniform_line = format!("uniform {} {};\n", uniform.kind.as_str(), uniform.name);
+        let uniform_line = match uniform.array_length {
+            Some(len) => {
+                format!(
+                    "uniform {} {}[{}];\n",
+                    uniform.kind.as_str(),
+                    uniform.name,
+                    len
+                )
+            }
+            None => {
+                format!("uniform {} {};\n", uniform.kind.as_str(), uniform.name)
+            }
+        };
+
         shader_code.extend(uniform_line.chars());
     }
 }
@@ -388,7 +401,8 @@ pub fn generate_fragment_stage_str(
     shader_src: &ShaderSource,
     imported_functions: &Vec<FunctionDefinition>,
 ) -> String {
-    let mut shader_code = String::from("#version 300 es\nprecision highp float;\nprecision highp int;\n");
+    let mut shader_code =
+        String::from("#version 300 es\nprecision highp float;\nprecision highp int;\n");
 
     push_stage_attributes(
         &mut shader_code,
@@ -415,7 +429,8 @@ pub fn generate_vertex_stage_str(
     shader_src: &ShaderSource,
     imported_functions: &Vec<FunctionDefinition>,
 ) -> String {
-    let mut shader_code = String::from("#version 300 es\nprecision highp float;\nprecision highp int;\n");
+    let mut shader_code =
+        String::from("#version 300 es\nprecision highp float;\nprecision highp int;\n");
 
     push_stage_attributes(&mut shader_code, &shader_src.vertex_shader.attributes, true);
     push_varying(&mut shader_code, false, &shader_src.varyings);

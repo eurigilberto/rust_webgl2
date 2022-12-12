@@ -69,6 +69,14 @@ impl GlVertexArrayObject {
         }
     }
 
+    pub fn get_index_type(&self) -> Option<IndexType> {
+        let index_buffer = self.index_buffer.borrow();
+        match index_buffer.as_ref() {
+            Some(index_buffer) => Some(index_buffer.index_type),
+            None => None,
+        }
+    }
+
     pub fn get_index_buffer(&self) -> Option<Weak<GlIndexBuffer>> {
         let index_buffer = self.index_buffer.borrow();
         match index_buffer.as_ref() {

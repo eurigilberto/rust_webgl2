@@ -1,10 +1,14 @@
 use glam::*;
 use std::{collections::HashMap, rc::Rc};
 use wasm_bindgen::JsValue;
-use web_sys::{WebGlProgram, WebGlUniformLocation, WebGlShader};
-use webgl2_shader_definition::{ShaderUniform, ShaderSource, generate_shader_str_from_single_source};
+use web_sys::{WebGlProgram, WebGlShader, WebGlUniformLocation};
+use webgl2_shader_definition::{
+    generate_shader_str_from_single_source, ShaderSource, ShaderUniform,
+};
 
-use crate::{GlShader, GlUniform, Graphics, IndexType, PrimitiveType, ShaderType, ProgramParamerter};
+use crate::{
+    GlShader, GlUniform, Graphics, IndexType, PrimitiveType, ProgramParamerter, ShaderType,
+};
 use web_sys::WebGl2RenderingContext as wgl_context;
 
 impl Drop for GlProgram {
@@ -95,13 +99,13 @@ impl GlProgram {
             Err(error) => Err(error),
         }
     }
-    pub fn get_uniform_block_index(&self, uniform_block_name: &str) -> Result<u32, JsValue> {
+    pub fn get_uniform_block_index(&self, uniform_block_name: &str) -> Result<u32, &str> {
         let index = self
             .context
             .get_uniform_block_index(&self.program, uniform_block_name);
 
         if index == wgl_context::INVALID_INDEX {
-            Err(JsValue::from("Invalid Index"))
+            Err("Invalid Index")
         } else {
             Ok(index)
         }
@@ -110,11 +114,13 @@ impl GlProgram {
         &self,
         uniform_block_name: &str,
         block_binding_number: u32,
-    ) {
-        let index = self
-            .get_uniform_block_index(uniform_block_name)
-            .expect("Unable to get uniform block index");
+    ) -> Result<(), &str> {
+        let index = match self.get_uniform_block_index(uniform_block_name) {
+            Ok(idx) => idx,
+            Err(_) => return Err("Unable to get uniform block index"),
+        };
         self.set_uniform_block_binding(index, block_binding_number);
+        Ok(())
     }
     pub fn set_uniform_block_binding(&self, uniform_block_index: u32, block_binding_number: u32) {
         self.context
@@ -127,13 +133,17 @@ impl GlProgram {
 
     pub fn use_program(&mut self) -> ProgramInUse {
         self.context.use_program(Some(&self.program));
-		ProgramInUse::new(self)
+        ProgramInUse::new(self)
     }
     fn unuse_program(&self) {
         self.context.use_program(None);
     }
 
-    pub fn insert_uniform(&mut self, uniform_name: &str, uniform: GlUniform) -> Result<UniformIndex, ()> {
+    pub fn insert_uniform(
+        &mut self,
+        uniform_name: &str,
+        uniform: GlUniform,
+    ) -> Result<UniformIndex, String> {
         match self.get_uniform_location(uniform_name) {
             Some(location) => {
                 let uniform_data = UniformData {
@@ -143,9 +153,7 @@ impl GlProgram {
                 };
                 Ok(self.uniforms.insert(uniform_name, uniform_data))
             }
-            None => {
-                panic!("Uniform - {} does not exist", uniform_name)
-            }
+            None => Err(format!("Uniform - {} does not exist", uniform_name)),
         }
     }
 
@@ -421,10 +429,9 @@ impl ProgramUniforms {
         }
     }
 
-    fn insert(&mut self, uniform_name: &str, uniform_data: UniformData)->UniformIndex {
+    fn insert(&mut self, uniform_name: &str, uniform_data: UniformData) -> UniformIndex {
         let index = UniformIndex(self.uniforms.len());
-        self.keys
-            .insert(uniform_name.to_string(), index);
+        self.keys.insert(uniform_name.to_string(), index);
         self.uniforms.push(uniform_data);
         index
     }

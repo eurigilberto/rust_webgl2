@@ -8,7 +8,7 @@ use crate::{
 };
 pub use constants::*;
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct Viewport {
     pub position: UVec2,
     pub size: UVec2,

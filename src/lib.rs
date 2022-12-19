@@ -37,12 +37,6 @@ pub use framebuffer::*;
 mod util;
 pub use util::*;
 
-#[allow(dead_code)]
-pub struct GLViewport {
-    pub position: IVec2,
-    pub size: IVec2,
-}
-
 pub fn get_canvas(canvas_id: &str) -> Result<HtmlCanvasElement, ()> {
     let document = web_sys::window().unwrap().document().unwrap();
     match document.get_element_by_id(canvas_id) {

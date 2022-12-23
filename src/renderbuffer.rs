@@ -36,9 +36,7 @@ impl Renderbuffer {
         };
 
         context.bind_renderbuffer(gl::RENDERBUFFER, Some(&renderbuffer));
-        if samples == 0 {
-            panic!("Cannot create render buffer with 0 samples")
-        }else if samples == 1{
+        if samples == 0 || samples == 1 {
             context.renderbuffer_storage(gl::RENDERBUFFER,
                 format.into(),
                 size.x as i32,

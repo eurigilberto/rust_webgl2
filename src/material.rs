@@ -1,5 +1,5 @@
 use crate::{
-    create_program_from_single_shader_source, shader_program::GlProgram, DrawCapabilities, Graphics, GlUniform, UniformIndex, GlTexture2D, TextureRef, IntoGlUniform,
+    create_program_from_single_shader_source, shader_program::GlProgram, DrawCapabilities, Graphics, GlUniform, UniformIndex, GlTexture2D, TextureRef, IntoGlUniform, ProgramCreationError,
 };
 use std::rc::Rc;
 use web_sys::WebGl2RenderingContext as wgl_context;
@@ -18,15 +18,17 @@ impl GlMaterial {
         graphics: &Graphics,
         draw_capabilities: Vec<DrawCapabilities>,
         source: &ShaderSource,
-    ) -> Self {
-        let program = create_program_from_single_shader_source(graphics, source)
-            .expect("Create Program Error");
-        Self{
+    ) -> Result<Self, ProgramCreationError> {
+        let program = match create_program_from_single_shader_source(graphics, source){
+            Ok(program) => program,
+            Err(error) => return Err(error),
+        };
+        Ok(Self{
             context: graphics.gl_context.clone(),
             program,
             draw_capabilities,
             sampled_textures:Vec::new()
-        }
+        })
     }
 
     /// There should be a parameter descriptor and parameter upload functions accompaniying this

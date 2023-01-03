@@ -7,7 +7,7 @@ use webgl2_shader_definition::{
 };
 
 use crate::{
-    GlShader, GlUniform, Graphics, IndexType, PrimitiveType, ProgramParamerter, ShaderType,
+    GlShader, GlUniform, Graphics, IndexType, PrimitiveType, ProgramParamerter, ShaderType, TextureBindTarget,
 };
 use web_sys::WebGl2RenderingContext as wgl_context;
 
@@ -413,7 +413,7 @@ pub struct UniformData {
     in_program: bool,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct UniformIndex(usize);
 
 pub struct ProgramUniforms {

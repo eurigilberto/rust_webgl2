@@ -403,12 +403,7 @@ pub fn generate_fragment_stage_str(
 ) -> String {
     let mut shader_code =
         String::from("#version 300 es\nprecision highp float;\nprecision highp int;\n");
-
-    push_stage_attributes(
-        &mut shader_code,
-        &shader_src.fragment_shader.attributes,
-        false,
-    );
+    push_stage_attributes(&mut shader_code, &shader_src.fragment_shader.attributes, false);
     push_varying(&mut shader_code, true, &shader_src.varyings);
     push_uniform_collection(&mut shader_code, &shader_src.common_uniforms);
     push_uniform_collection(

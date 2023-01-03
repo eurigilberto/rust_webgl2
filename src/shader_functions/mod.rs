@@ -61,11 +61,38 @@ pub mod gerstner_waves {
     pub const PARAMS: &str =
         "vec2 position, vec2 wave_axis, float wavelength, float time, float steepness";
     pub const FN: &str = r#"
-float w_pos = dot(position, wave_axis);
+float position_x = dot(position, wave_axis);
 float k = 2.0 * 3.1416 / wavelength;
-float f = k * (w_pos - time);
+float f = k * (position_x - time);
 float a = steepness / k;
 return vec2(a * cos(f), a * sin(f));
+"#;
+    pub const RETURN_TYPE: WebGLDataType = WebGLDataType::Vec2;
+    pub fn definition() -> FunctionDefinition {
+        FunctionDefinition {
+            name: NAME.into(),
+            definition: FunctionDefinitionType::InlineFn {
+                return_type: RETURN_TYPE,
+                parameters: PARAMS.into(),
+                body: FN.into(),
+            },
+        }
+    }
+}
+
+pub mod gerstner_waves_normal {
+    use webgl2_shader_definition::*;
+
+    pub const NAME: &str = "gerstner_waves_normal";
+    pub const PARAMS: &str =
+        "vec2 position, vec2 wave_axis, float wavelength, float time, float steepness";
+    pub const FN: &str = r#"
+float position_x = dot(position, wave_axis);
+float k = 2.0 * 3.1416 / wavelength;
+float f = k * (position_x - time);
+float a = steepness / k;
+vec2 tangent = normalize(vec2( 1.0 - steepness * sin(f), steepness * cos(f)));
+return vec2(-tangent.y, tangent.x);
 "#;
     pub const RETURN_TYPE: WebGLDataType = WebGLDataType::Vec2;
     pub fn definition() -> FunctionDefinition {

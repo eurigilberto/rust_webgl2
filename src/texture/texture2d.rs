@@ -1,13 +1,13 @@
 use std::rc::Rc;
 
+use crate::{
+    set_base_level, set_mag_filter, set_max_level, set_min_filter, set_min_max_lod, tex_wrap,
+    Graphics, MagFilter, MinFilter, TextureBindTarget, TextureFormat, TextureInternalFormat,
+    TextureType, TextureWrap, TextureWrapSelect,
+};
 use glam::*;
 use wasm_bindgen::JsValue;
 use web_sys::{WebGl2RenderingContext as gl, WebGlTexture};
-use crate::{
-    set_base_level, set_mag_filter, set_max_level, set_min_filter, set_min_max_lod, tex_wrap,
-    Graphics, MagFilter, MinFilter, TextureBindTarget, TextureFormat, TextureType, TextureWrap,
-    TextureWrapSelect, TextureInternalFormat,
-};
 
 #[derive(Clone, Copy)]
 pub struct Texture2DProps {
@@ -45,6 +45,18 @@ impl Texture2DProps {
         set_max_level(context, target.into(), self.max_level);
 
         set_min_max_lod(context, target.into(), self.min_max_lod);
+    }
+
+    pub fn clamped_linear_no_mipmap() -> Texture2DProps {
+        Texture2DProps {
+            wrap_x: TextureWrap::CLAMP_TO_EDGE,
+            wrap_y: TextureWrap::CLAMP_TO_EDGE,
+            mag_filter: MagFilter::LINEAR,
+            min_filter: MinFilter::LINEAR,
+            base_level: 0,
+            max_level: 1,
+            min_max_lod: (0.0, 0.0),
+        }
     }
 }
 
@@ -112,22 +124,8 @@ impl GlTexture2D {
         src_data: &[T],
         src_offset: u32,
     ) -> Result<(), JsValue> {
-        let internal_format: u32 = self.format.into();
-        let format: TextureFormat = self.format.into();
-        let type_: TextureType = self.format.into();
-        self.context
-            .tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_u8_array_and_src_offset(
-                TextureBindTarget::TEXTURE_2D.into(),
-                level as i32,
-                internal_format as i32,
-                self.size.x as i32,
-                self.size.y as i32,
-                0,
-                format.into(),
-                type_.into(),
-                bytemuck::cast_slice(src_data),
-                src_offset,
-            )
+        self.set_sub_texture_data(level, src_data, src_offset, uvec2(0,0), self.size)?;
+        Ok(())
     }
 
     pub fn set_sub_texture_data<T: bytemuck::Pod>(
@@ -136,7 +134,9 @@ impl GlTexture2D {
         src_data: &[T],
         src_offset: u32,
         offset: UVec2,
+        size: UVec2,
     ) -> Result<(), JsValue> {
+        self.bind();
         let format: TextureFormat = self.format.into();
         let type_: TextureType = self.format.into();
         self.context
@@ -145,13 +145,15 @@ impl GlTexture2D {
                 level as i32,
                 offset.x as i32,
                 offset.y as i32,
-                self.size.x as i32,
-                self.size.y as i32,
+                size.x as i32,
+                size.y as i32,
                 format.into(),
                 type_.into(),
                 bytemuck::cast_slice(src_data),
                 src_offset,
-            )
+            )?;
+        self.unbind();
+        Ok(())
     }
 }
 

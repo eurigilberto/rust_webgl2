@@ -1,7 +1,7 @@
 use web_sys::WebGl2RenderingContext as gl;
 
 #[allow(dead_code)]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct FramebufferBinding(u32);
 #[allow(dead_code)]
 impl FramebufferBinding{

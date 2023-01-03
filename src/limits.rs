@@ -22,6 +22,7 @@ impl DeviceLimit{
     pub const MAX_FRAGMENT_UNIFORM_COMPONENTS: DeviceLimit = DeviceLimit(wgl_context::MAX_FRAGMENT_UNIFORM_COMPONENTS);
     pub const MAX_PROGRAM_TEXEL_OFFSET: DeviceLimit = DeviceLimit(wgl_context::MAX_PROGRAM_TEXEL_OFFSET);
     pub const MAX_SAMPLES: DeviceLimit = DeviceLimit(wgl_context::MAX_SAMPLES);
+    pub const MAX_VERTEX_TEXTURE_IMAGE_UNITS: DeviceLimit = DeviceLimit(wgl_context::MAX_VERTEX_TEXTURE_IMAGE_UNITS);
     pub const MAX_SERVER_WAIT_TIMEOUT: DeviceLimit = DeviceLimit(wgl_context::MAX_SERVER_WAIT_TIMEOUT);
     pub const MAX_TEXTURE_LOD_BIAS: DeviceLimit = DeviceLimit(wgl_context::MAX_TEXTURE_LOD_BIAS);
     pub const MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS: DeviceLimit = DeviceLimit(wgl_context::MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS);

@@ -1,7 +1,8 @@
 use std::{cell::{RefCell, Ref}, rc::Rc};
 
 use glam::UVec2;
-use web_sys::{WebGl2RenderingContext as gl, WebGlFramebuffer};
+use wasm_bindgen::JsValue;
+use web_sys::{WebGl2RenderingContext as gl, WebGlFramebuffer, WebGlTexture};
 mod constants;
 use crate::{
     FramebufferMaskBits, GlTexture2D, Graphics, MagFilter, Renderbuffer, TextureBindTarget,
@@ -19,6 +20,16 @@ pub enum FramebufferAttachment {
     Color(u32),
     Depth,
     DepthStencil,
+}
+
+impl Into<u32> for FramebufferAttachment{
+    fn into(self) -> u32 {
+        match self {
+            FramebufferAttachment::Color(index) => gl::COLOR_ATTACHMENT0 + index,
+            FramebufferAttachment::Depth => gl::DEPTH_ATTACHMENT,
+            FramebufferAttachment::DepthStencil => gl::DEPTH_STENCIL_ATTACHMENT,
+        }
+    }
 }
 
 pub trait FramebufferBindable{
@@ -75,6 +86,15 @@ impl Framebuffer {
         }
     }
 
+    pub fn set_draw_buffers(&self, attachments: Vec<u32>){
+        let buffers_array = js_sys::Array::new();
+        for attachment in attachments{
+            let attachment_index = gl::COLOR_ATTACHMENT0 + attachment;
+            buffers_array.push(&JsValue::from(attachment_index));
+        }
+        self.context.draw_buffers(&buffers_array)
+    }
+
     pub fn bind(&self, target: FramebufferBinding) {
         self.unbind();
         self.context
@@ -100,27 +120,20 @@ impl Framebuffer {
         texture: Option<&GlTexture2D>,
     ) {
         self.bind(FramebufferBinding::DRAW_FRAMEBUFFER);
-        let mut tx = None;
-        if let Some(texture) = texture {
+        let texture = if let Some(texture) = texture {
             texture.bind();
-            tx = Some(&texture.texture);
-        }
+            Some(&texture.texture)
+        } else {
+            None
+        };
 
         self.context.framebuffer_texture_2d(
             FramebufferBinding::DRAW_FRAMEBUFFER.into(),
-            match attachment {
-                FramebufferAttachment::Color(index) => gl::COLOR_ATTACHMENT0 + index,
-                FramebufferAttachment::Depth => gl::DEPTH_ATTACHMENT,
-                FramebufferAttachment::DepthStencil => gl::DEPTH_STENCIL_ATTACHMENT,
-            },
+            attachment.into(),
             TextureBindTarget::TEXTURE_2D.into(),
-            tx,
+            texture,
             0,
         );
-
-        if let Some(texture) = texture {
-            texture.unbind();
-        }
         self.unbind();
     }
 
@@ -130,24 +143,18 @@ impl Framebuffer {
         renderbuffer: Option<&Renderbuffer>,
     ) {
         self.bind(FramebufferBinding::DRAW_FRAMEBUFFER);
-        {
-            let renderbuffer = if let Some(renderbuffer) = renderbuffer {
-                renderbuffer.bind();
-                Some(&renderbuffer.renderbuffer)
-            } else {
-                None
-            };
-            self.context.framebuffer_renderbuffer(
-                FramebufferBinding::DRAW_FRAMEBUFFER.into(),
-                match attachment {
-                    FramebufferAttachment::Color(index) => gl::COLOR_ATTACHMENT0 + index,
-                    FramebufferAttachment::Depth => gl::DEPTH_ATTACHMENT,
-                    FramebufferAttachment::DepthStencil => gl::DEPTH_STENCIL_ATTACHMENT,
-                },
-                gl::RENDERBUFFER,
-                renderbuffer,
-            );
-        }
+        let renderbuffer = if let Some(renderbuffer) = renderbuffer {
+            renderbuffer.bind();
+            Some(&renderbuffer.renderbuffer)
+        } else {
+            None
+        };
+        self.context.framebuffer_renderbuffer(
+            FramebufferBinding::DRAW_FRAMEBUFFER.into(),
+            attachment.into(),
+            gl::RENDERBUFFER,
+            renderbuffer,
+        );
         self.unbind();
     }
 

@@ -216,6 +216,6 @@ impl Framebuffer {
 impl Drop for Framebuffer {
     fn drop(&mut self) {
         self.unbind();
-        self.context.delete_framebuffer(Some(&self.framebuffer))
+        self.context.delete_framebuffer(Some(&self.framebuffer));
     }
 }

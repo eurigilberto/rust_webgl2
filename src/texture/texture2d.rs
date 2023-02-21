@@ -67,6 +67,7 @@ pub struct GlTexture2D {
     pub format: TextureInternalFormat,
     pub size: UVec2,
     pub mipmap: Option<u32>,
+    pub name: String,
 }
 
 impl GlTexture2D {
@@ -105,7 +106,16 @@ impl GlTexture2D {
             format,
             size,
             mipmap,
+            name: String::from(""),
         })
+    }
+
+    pub fn set_name(&mut self, name: String) {
+        self.name = name;
+    }
+
+    pub fn is_texture(&self) -> bool {
+        self.context.is_texture(Some(&self.texture))
     }
 
     pub fn bind(&self) {
@@ -160,6 +170,6 @@ impl GlTexture2D {
 impl Drop for GlTexture2D {
     fn drop(&mut self) {
         self.unbind();
-        self.context.delete_texture(Some(&self.texture))
+        self.context.delete_texture(Some(&self.texture));
     }
 }

@@ -78,7 +78,7 @@ impl RGBA {
             r: f32::powf(self.r, 2.2),
             g: f32::powf(self.g, 2.2),
             b: f32::powf(self.b, 2.2),
-            a: 1.0,
+            a: self.a,
         }
     }
     pub fn new_u8(r: u8, g: u8, b: u8, a: u8) -> Self {

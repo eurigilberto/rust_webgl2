@@ -93,6 +93,10 @@ impl Graphics {
         })
     }
 
+    pub fn get_canvas_size(&self) -> UVec2 {
+        UVec2::new(self.canvas.width(), self.canvas.height())
+    }
+
     #[allow(dead_code)]
     pub fn resize(&mut self, new_size: UVec2) {
         self.canvas.set_width(new_size.x);
@@ -165,6 +169,11 @@ impl Graphics {
 
     pub fn bind_default_vertex_array(&self) {
         self.gl_context.bind_vertex_array(None);
+    }
+
+    pub fn finish(&self){
+        self.gl_context.flush();
+        self.gl_context.finish();
     }
 }
 

@@ -48,6 +48,12 @@ impl IntoGlUniform for Vec2{
     }
 }
 
+impl IntoGlUniform for UVec2{
+    fn uniform(&self)->GlUniform {
+        UIntUniform::Vec2(*self).into()
+    }
+}
+
 impl IntoGlUniform for RGBA{
 	fn uniform(&self)->GlUniform {
 		FloatUniform::Vec4(Vec4::from_array((*self).into())).into()

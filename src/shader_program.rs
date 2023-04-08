@@ -139,6 +139,9 @@ impl GlProgram {
         self.context.use_program(None);
     }
 
+    /// Use to cache the uniform's location and set a default value to it
+    /// When in the render process use the function PushUniform / PushAllUniforms inside the ProgramInUse struct
+    /// to make sure the program state is updated with the values here
     pub fn insert_uniform(
         &mut self,
         uniform_name: &str,

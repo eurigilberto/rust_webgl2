@@ -217,5 +217,6 @@ impl Drop for Framebuffer {
     fn drop(&mut self) {
         self.unbind();
         self.context.delete_framebuffer(Some(&self.framebuffer));
+        //web_sys::console::log_1(&JsValue::from_str("Dropped FrameBuffer GLObject"))
     }
 }

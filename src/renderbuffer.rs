@@ -1,20 +1,23 @@
 use std::rc::Rc;
 
 use glam::*;
+use wasm_bindgen::JsValue;
 use web_sys::{WebGl2RenderingContext as gl, WebGlRenderbuffer};
 
 use crate::{limits, Graphics, TextureInternalFormat};
 
 pub struct Renderbuffer {
     context: Rc<gl>,
+    pub name: Option<String>,
     pub renderbuffer: WebGlRenderbuffer,
     pub size: UVec2, 
-    pub format: TextureInternalFormat
+    pub format: TextureInternalFormat,
 }
 
 impl Renderbuffer {
     pub fn new(
         graphics: &Graphics,
+        name: Option<String>,
         desired_sample_count: u32,
         size: UVec2,
         format: TextureInternalFormat,
@@ -54,6 +57,7 @@ impl Renderbuffer {
 
         Ok(Self {
             context,
+            name,
             renderbuffer,
             size,
             format
@@ -67,5 +71,18 @@ impl Renderbuffer {
 
     pub fn unbind(&self) {
         self.context.bind_framebuffer(gl::RENDERBUFFER, None);
+    }
+}
+
+impl Drop for Renderbuffer{
+    fn drop(&mut self) {
+        //self.unbind();
+        self.context.delete_renderbuffer(Some(&self.renderbuffer));
+        /*match &self.name {
+            Some(name) => {
+                web_sys::console::log_1(&JsValue::from_str(&format!("Dropped renderbuffer -- {}", name)))
+            },
+            None => {},
+        }*/
     }
 }

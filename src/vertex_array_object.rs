@@ -7,9 +7,9 @@ use crate::{AttributeSize, BindingPoint, GlBuffer, GlIndexBuffer, Graphics, Numb
 #[derive(Debug, Clone, Copy)]
 pub enum AttributeType {
     Single,
-    Interleaved { stride: u8, offset: u8 },
+    Interleaved { stride: u8, offset: u32 },
     PerInstance { stride: u8, divisor: u8 },
-    PerInstanceInterleaved { stride: u8, offset: u8, divisor: u8 },
+    PerInstanceInterleaved { stride: u8, offset: u32, divisor: u8 },
 }
 
 pub struct AttributeDescription {
@@ -22,7 +22,7 @@ pub struct AttributeDescription {
 }
 
 impl AttributeDescription {
-    pub fn get_stride_and_offset(&self) -> (u8, u8) {
+    pub fn get_stride_and_offset(&self) -> (u8, u32) {
         match self.kind {
             AttributeType::Single => (0, 0),
             AttributeType::PerInstance { stride, .. } => (stride, 0),
@@ -39,6 +39,7 @@ pub struct GlVertexArrayObject {
     index_buffer: RefCell<Option<Rc<GlIndexBuffer>>>,
     buffers: RefCell<Vec<Rc<GlBuffer>>>,
     attribute_descriptors: Vec<AttributeDescription>,
+
 }
 
 impl GlVertexArrayObject {
@@ -47,8 +48,9 @@ impl GlVertexArrayObject {
     /// with the provided attribute description.
     /// This properly selects the webgl2 attrib pointer function to use
     /// depending on the value type and the normalization property
-    fn vertex_attrib_pointer(graphics: &Graphics, attribute: &AttributeDescription) {
-        let (stride, offset) = attribute.get_stride_and_offset();
+    fn vertex_attrib_pointer(graphics: &Graphics, attribute: &AttributeDescription, instance_offset: u32) {
+        let (stride, mut offset) = attribute.get_stride_and_offset();
+        offset = offset + instance_offset * stride as u32; //Set the starting pointer for the attribute to the correct instance offset
         if attribute.unit_type.is_integer_type() && !attribute.normalize {
             graphics.gl_context.vertex_attrib_i_pointer_with_i32(
                 attribute.location,
@@ -136,14 +138,13 @@ impl GlVertexArrayObject {
                 graphics.gl_context.bind_vertex_array(Some(&vertex_array));
                 Self::check_no_overlapping_locations(&attribute_descriptors);
 
-                let mut vao_buffers = Vec::new();
+                let vao_buffers = buffers.iter().map(|buff| Rc::clone(buff)).collect::<Vec<_>>();
                 for attribute in attribute_descriptors.iter() {
-                    let buffer = &buffers[attribute.buffer];
-                    vao_buffers.push(Rc::clone(buffer));
+                    let buffer = &vao_buffers[attribute.buffer];
                     buffer.bind();
 
                     Self::enable_vertex_attrib(graphics, attribute);
-                    Self::vertex_attrib_pointer(graphics, attribute);
+                    Self::vertex_attrib_pointer(graphics, attribute, 0);
                     Self::vertex_attrib_divisor(graphics, attribute);
 
                     bound_points.insert(buffer.binding_point);
@@ -183,12 +184,28 @@ impl GlVertexArrayObject {
         for attribute in self.attribute_descriptors.iter() {
             if attribute.buffer == index {
                 buffer.bind();
-                Self::vertex_attrib_pointer(graphics, attribute);
+                Self::vertex_attrib_pointer(graphics, attribute, 0);
             }
         }
         self.unbind();
         graphics.bind_buffer(BindingPoint::ARRAY_BUFFER, None);
         self.buffers.borrow_mut()[index] = buffer;
+    }
+
+    pub fn set_instance_offset(&self, graphics: &Graphics, instance_offset: u32) {
+        self.bind();
+        for attribute in self.attribute_descriptors.iter() {
+            match attribute.kind {
+                AttributeType::PerInstance { .. } | AttributeType::PerInstanceInterleaved { .. } => {
+                    let buffer = &self.buffers.borrow()[attribute.buffer];
+                    buffer.bind();
+                    Self::vertex_attrib_pointer(graphics, attribute, instance_offset);
+                }
+                _ => {}
+            }
+        }
+        self.unbind();
+        graphics.bind_buffer(BindingPoint::ARRAY_BUFFER, None);
     }
 
     pub fn swap_index_buffer(&self, graphics: &Graphics, index_buffer: Option<Rc<GlIndexBuffer>>) {

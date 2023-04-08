@@ -265,6 +265,7 @@ pub struct ShaderSource {
     pub varyings: Vec<ShaderVarying>,
     pub common_uniforms: UniformCollection,
     pub imported_functions: Vec<FunctionDefinition>,
+    pub local_import: Option<String>,
     pub vertex_shader: ShaderStage,
     pub fragment_shader: ShaderStage,
 }
@@ -397,6 +398,13 @@ fn push_stage_attributes(
     }
 }
 
+fn push_local_import(shader_code: &mut String, local_import: &Option<String>) {
+    if let Some(inline_import) = local_import {
+        let import = format!("\n{}\n", inline_import);
+        shader_code.extend(import.chars());
+    }
+}
+
 pub fn generate_fragment_stage_str(
     shader_src: &ShaderSource,
     imported_functions: &Vec<FunctionDefinition>,
@@ -415,6 +423,7 @@ pub fn generate_fragment_stage_str(
         &shader_src.fragment_shader.import_fn,
         imported_functions,
     );
+    push_local_import(&mut shader_code, &shader_src.local_import);
     push_main_function(&mut shader_code, &shader_src.fragment_shader.main_fn);
 
     shader_code
@@ -439,6 +448,7 @@ pub fn generate_vertex_stage_str(
         &shader_src.vertex_shader.import_fn,
         imported_functions,
     );
+    push_local_import(&mut shader_code, &shader_src.local_import);
     push_main_function(&mut shader_code, &shader_src.vertex_shader.main_fn);
 
     shader_code

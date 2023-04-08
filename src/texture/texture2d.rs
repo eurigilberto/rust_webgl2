@@ -67,7 +67,7 @@ pub struct GlTexture2D {
     pub format: TextureInternalFormat,
     pub size: UVec2,
     pub mipmap: Option<u32>,
-    pub name: String,
+    pub name: Option<String>,
 }
 
 impl GlTexture2D {
@@ -77,6 +77,7 @@ impl GlTexture2D {
         size: UVec2,
         format: TextureInternalFormat,
         mipmap: Option<u32>,
+        name: Option<String>,
     ) -> Result<Self, ()> {
         let ctx = graphics.get_gl_context_clone();
         let texture = match ctx.create_texture() {
@@ -106,12 +107,12 @@ impl GlTexture2D {
             format,
             size,
             mipmap,
-            name: String::from(""),
+            name,
         })
     }
 
     pub fn set_name(&mut self, name: String) {
-        self.name = name;
+        self.name = Some(name);
     }
 
     pub fn is_texture(&self) -> bool {
@@ -171,5 +172,11 @@ impl Drop for GlTexture2D {
     fn drop(&mut self) {
         self.unbind();
         self.context.delete_texture(Some(&self.texture));
+        /*match &self.name {
+            Some(name) => {
+                web_sys::console::log_1(&JsValue::from_str(&format!("Dropped renderbuffer -- {}", name)))
+            },
+            None => {},
+        }*/
     }
 }

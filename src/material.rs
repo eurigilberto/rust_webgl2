@@ -101,8 +101,19 @@ impl GlMaterial {
         let texture_uniform_index = self
             .program
             .insert_uniform(uniform_name, (0 as i32).uniform())?;
-        self.sampled_textures
-            .push((texture_ref, texture_uniform_index));
+
+        let sampled_texture = self
+            .sampled_textures
+            .iter()
+            .position(|(_, uni_index)| *uni_index == texture_uniform_index);
+        match sampled_texture{
+            Some(index) => {
+                self.sampled_textures[index] = (texture_ref, texture_uniform_index);
+            },
+            None => {
+                self.sampled_textures.push((texture_ref, texture_uniform_index));
+            },
+        }
         Ok(())
     }
 

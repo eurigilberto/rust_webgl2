@@ -7,7 +7,7 @@ use webgl2_shader_definition::{
 };
 
 use crate::{
-    GlShader, GlUniform, Graphics, IndexType, PrimitiveType, ProgramParamerter, ShaderType, TextureBindTarget,
+    GlShader, GlUniform, Graphics, IndexType, PrimitiveType, ProgramParamerter, ShaderType,
 };
 use web_sys::WebGl2RenderingContext as wgl_context;
 
@@ -433,10 +433,15 @@ impl ProgramUniforms {
     }
 
     fn insert(&mut self, uniform_name: &str, uniform_data: UniformData) -> UniformIndex {
-        let index = UniformIndex(self.uniforms.len());
-        self.keys.insert(uniform_name.to_string(), index);
-        self.uniforms.push(uniform_data);
-        index
+        if let Some(uniform_index) = self.keys.get(uniform_name){
+            self.uniforms[uniform_index.0] = uniform_data;
+            return *uniform_index;
+        }else{
+            let index = UniformIndex(self.uniforms.len());
+            self.keys.insert(uniform_name.to_string(), index);
+            self.uniforms.push(uniform_data);
+            index
+        }
     }
 
     pub fn get_uniform_location_by_name(&self, name: &str) -> WebGlUniformLocation {

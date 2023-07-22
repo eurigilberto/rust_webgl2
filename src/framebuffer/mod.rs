@@ -2,7 +2,7 @@ use std::{cell::{RefCell, Ref}, rc::Rc};
 
 use glam::UVec2;
 use wasm_bindgen::JsValue;
-use web_sys::{WebGl2RenderingContext as gl, WebGlFramebuffer, WebGlTexture};
+use web_sys::{WebGl2RenderingContext as gl, WebGlFramebuffer};
 mod constants;
 use crate::{
     FramebufferMaskBits, GlTexture2D, Graphics, MagFilter, Renderbuffer, TextureBindTarget,

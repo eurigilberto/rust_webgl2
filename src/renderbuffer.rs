@@ -1,7 +1,6 @@
 use std::rc::Rc;
 
 use glam::*;
-use wasm_bindgen::JsValue;
 use web_sys::{WebGl2RenderingContext as gl, WebGlRenderbuffer};
 
 use crate::{limits, Graphics, TextureInternalFormat};

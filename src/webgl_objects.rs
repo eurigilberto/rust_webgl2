@@ -121,26 +121,27 @@ impl GlBuffer {
         );
         self.unbind();
     }
-    pub fn partial_buffer_data<T: bytemuck::Pod>(&self, src_data: &[T], copy_length: u32) {
-        self.partial_buffer_data_offset(src_data, copy_length, 0);
+    pub fn partial_buffer_data<T: bytemuck::Pod>(&self, dst_offset: u32, src_data: &[T], copy_length: u32) {
+        self.partial_buffer_data_offset(dst_offset, src_data, copy_length, 0);
     }
     pub fn partial_buffer_data_offset<T: bytemuck::Pod>(
         &self,
+        dst_byte_offset: u32,
         src_data: &[T],
         copy_length: u32,
-        src_offset: u32,
+        src_byte_offset: u32,
     ) {
         let src_data_slice: &[u8] = bytemuck::cast_slice(src_data);
-        if src_data_slice.len() < copy_length as usize {
+        if src_data_slice.len() < (copy_length + src_byte_offset) as usize {
             panic!("Out of bounds copy")
         }
         self.bind();
         self.context
-            .buffer_data_with_u8_array_and_src_offset_and_length(
+            .buffer_sub_data_with_i32_and_u8_array_and_src_offset_and_length(
                 self.binding_point.into(),
+                dst_byte_offset as i32,
                 bytemuck::cast_slice(src_data),
-                self.usage.into(),
-                src_offset,
+                src_byte_offset,
                 copy_length,
             );
         self.unbind();
